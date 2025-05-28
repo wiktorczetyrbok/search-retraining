@@ -25,7 +25,7 @@ public class FileFinderLucene {
 
         runQuery(dir, "lqdocspg");
         runQuery(dir, "lqd///gif");
-        runQuery(dir, "minusbottom.gif");
+        runQuery(dir, "minusbottom");
     }
 
     private static void index(IndexWriter writer, String path) throws IOException {
@@ -57,10 +57,12 @@ public class FileFinderLucene {
 
     private static String buildRegex(String input) {
         StringBuilder regex = new StringBuilder();
+        regex.append("*");
         for (char c : input.toCharArray()) {
             if (Character.isLetterOrDigit(c)) {
                 regex.append(c).append("*");
             }
+
         }
         return regex.toString();
     }

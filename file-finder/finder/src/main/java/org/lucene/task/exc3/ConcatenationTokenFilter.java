@@ -10,7 +10,6 @@ public final class ConcatenationTokenFilter extends TokenFilter {
     private final CharTermAttribute termAttr = addAttribute(CharTermAttribute.class);
     private final StringBuilder buffer = new StringBuilder();
     private final String delimiter;
-    private boolean finished = false;
 
     public ConcatenationTokenFilter(TokenStream input, String delimiter) {
         super(input);
@@ -19,8 +18,6 @@ public final class ConcatenationTokenFilter extends TokenFilter {
 
     @Override
     public boolean incrementToken() throws IOException {
-        if (finished) return false;
-
         buffer.setLength(0);
         boolean hasToken = false;
 
@@ -33,7 +30,6 @@ public final class ConcatenationTokenFilter extends TokenFilter {
         if (hasToken) {
             clearAttributes();
             termAttr.append(buffer.toString());
-            finished = true;
             return true;
         }
 
@@ -43,6 +39,5 @@ public final class ConcatenationTokenFilter extends TokenFilter {
     @Override
     public void reset() throws IOException {
         super.reset();
-        finished = false;
     }
 }
