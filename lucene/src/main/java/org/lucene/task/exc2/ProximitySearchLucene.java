@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProximitySearchLucene {
+    //bonus question 1 - probably the BooleanQuery with a combination of Phrase Query and PrefixQuery should be used
+    //bouns question 2 - using Phrase query with slop should allow only ordered gaps (no changes needed)
 
     public static void main(String[] args) throws IOException {
         Directory dir = new ByteBuffersDirectory();
