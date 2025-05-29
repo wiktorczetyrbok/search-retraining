@@ -17,11 +17,11 @@ public class ConcatenationAnalyzerTest {
         Set<String> stopWords = Set.of("the", "is", "at", "which", "on");
         Analyzer analyzer = new ConcatenationAnalyzer(stopWords, " ");
 
-        try (var ts = analyzer.tokenStream("field", new StringReader("the quick brown fox is at the zoo which is on the table"))) {
+        try (var ts = analyzer.tokenStream("field", new StringReader("the test case for the task is at the testing suite which is on the disk"))) {
             CharTermAttribute attr = ts.addAttribute(CharTermAttribute.class);
             ts.reset();
             if (ts.incrementToken()) {
-                assertEquals("quick brown fox zoo table", attr.toString());
+                assertEquals("test case for task testing suite disk", attr.toString());
             } else {
                 throw new AssertionError("No token found");
             }

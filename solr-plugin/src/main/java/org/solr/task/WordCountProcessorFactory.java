@@ -12,9 +12,7 @@ import java.io.IOException;
 public class WordCountProcessorFactory extends UpdateRequestProcessorFactory {
 
     @Override
-    public UpdateRequestProcessor getInstance(SolrQueryRequest req,
-                                              SolrQueryResponse rsp,
-                                              UpdateRequestProcessor next) {
+    public UpdateRequestProcessor getInstance(SolrQueryRequest req, SolrQueryResponse rsp, UpdateRequestProcessor next) {
         return new UpdateRequestProcessor(next) {
             @Override
             public void processAdd(AddUpdateCommand cmd) throws IOException {
@@ -35,5 +33,4 @@ public class WordCountProcessorFactory extends UpdateRequestProcessorFactory {
             }
         };
     }
-
 }
