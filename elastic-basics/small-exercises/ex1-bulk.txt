@@ -1,0 +1,20 @@
+POST my_second_index/_bulk
+{"index": { "_id": "1" }}
+{"text1": "Test_text", "text2": "Another_test_text"}
+{"update": { "_id": "1" }}
+{"doc": {"text1": "Test_text_UPDATED", "text3": "Just_one_more_text"}}
+
+
+// verify
+GET my_second_index/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {"term": {"text1.keyword": "Test_text_UPDATED"}},
+        {"term": {"text2.keyword": "Another_test_text"}},
+        {"term": {"text3.keyword": "Just_one_more_text"}}
+      ]
+    }
+  }
+}
