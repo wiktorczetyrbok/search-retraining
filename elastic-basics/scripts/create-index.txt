@@ -1,0 +1,219 @@
+PUT products
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "similarity": {
+        "default": {
+          "type": "boolean"
+        }
+      },
+      "analysis": {
+        "char_filter": {
+          "brackets_and_commas_char_filter": {
+            "type": "pattern_replace",
+            "pattern": "[(),\\[\\]]",
+            "replacement": ""
+          }
+        },
+        "normalizer": {
+          "keyword-normalizer": {
+            "char_filter": ["brackets_and_commas_char_filter"],
+            "filter": [
+              "lowercase",
+              "asciifolding"
+            ]
+          }
+        },
+        "tokenizer": {
+          "path-tokenizer": {
+            "type": "path_hierarchy",
+            "delimiter": "/"
+          }
+        },
+        "filter": {
+          "en_light_stemming": {
+            "type": "stemmer",
+            "name": "light_english"
+          },
+          "shingle_filter": {
+            "type": "shingle",
+            "min_shingle_size": 2,
+            "max_shingle_size": 5,
+            "output_unigrams": false
+          }
+        },
+        "analyzer": {
+          "text_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "asciifolding",
+              "lowercase",
+              "en_light_stemming"
+            ]
+          },
+          "shingle_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "asciifolding",
+              "lowercase",
+              "en_light_stemming",
+              "shingle_filter",
+              "unique"
+            ]
+          },
+          "path-analyzer": {
+            "type": "custom",
+            "tokenizer": "path-tokenizer"
+          }
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword",
+        "doc_values": false
+      },
+      "price": {
+        "type": "scaled_float",
+        "scaling_factor": 100
+      },
+      "category_path": {
+        "type": "text",
+        "analyzer": "path-analyzer",
+        "search_analyzer": "keyword",
+        "norms": false,
+        "index_options": "docs"
+      },
+      "product_type": {
+        "type": "keyword",
+        "normalizer": "keyword-normalizer",
+        "fields": {
+          "shingles": {
+            "type": "text",
+            "analyzer": "shingle_analyzer",
+            "norms": false,
+            "index_options": "docs"
+          },
+          "text": {
+            "type": "text",
+            "analyzer": "text_analyzer",
+            "norms": false,
+            "index_options": "docs"
+          }
+        }
+      },
+      "brand": {
+        "type": "keyword",
+        "normalizer": "keyword-normalizer",
+        "fields": {
+          "shingles": {
+            "type": "text",
+            "analyzer": "shingle_analyzer",
+            "norms": false,
+            "index_options": "docs"
+          },
+          "text": {
+            "type": "text",
+            "analyzer": "text_analyzer",
+            "norms": false,
+            "index_options": "docs"
+          },
+          "raw": {
+            "type": "keyword"
+          }
+        }
+      },
+      "name": {
+        "type": "keyword",
+        "normalizer": "keyword-normalizer",
+        "fields": {
+          "shingles": {
+            "type": "text",
+            "analyzer": "shingle_analyzer",
+            "norms": false,
+            "index_options": "docs"
+          },
+          "text": {
+            "type": "text",
+            "analyzer": "text_analyzer",
+            "norms": false
+          }
+        }
+      },
+      "description": {
+        "type": "keyword",
+        "index": false,
+        "doc_values": false,
+        "fields": {
+          "shingles": {
+            "type": "text",
+            "analyzer": "shingle_analyzer",
+            "norms": false,
+            "index_options": "docs"
+          },
+          "text": {
+            "type": "text",
+            "analyzer": "text_analyzer",
+            "norms": false,
+            "index_options": "docs"
+          }
+        }
+      },
+      "image_url": {
+        "type": "object",
+        "enabled": false
+      },
+      "skus": {
+        "type": "nested",
+        "properties": {
+          "sku_id": {
+            "type": "keyword",
+            "doc_values": false
+          },
+          "color": {
+            "type": "keyword",
+            "normalizer": "keyword-normalizer",
+            "fields": {
+              "shingles": {
+                "type": "text",
+                "analyzer": "shingle_analyzer",
+                "norms": false,
+                "index_options": "docs"
+              },
+              "text": {
+                "type": "text",
+                "analyzer": "text_analyzer",
+                "norms": false
+              }
+            }
+          },
+          "size": {
+            "type": "keyword",
+            "normalizer": "keyword-normalizer",
+            "fields": {
+              "shingles": {
+                "type": "text",
+                "analyzer": "shingle_analyzer",
+                "norms": false,
+                "index_options": "docs"
+              },
+              "text": {
+                "type": "text",
+                "analyzer": "text_analyzer",
+                "norms": false,
+                "index_options": "docs"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
