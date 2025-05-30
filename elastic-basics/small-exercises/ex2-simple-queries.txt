@@ -1,0 +1,54 @@
+//Create a search request to the products index using a match_all query
+// that returns only 3 documents.
+
+GET products/_search
+{
+    "query": {
+        "match_all": {}
+    },
+    "size": 3
+}
+
+
+// Create a search request to the products index using a range query
+// by the price field that returns only 2 documents with _id = 3 and 5.
+
+
+GET products/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "price": {
+              "gte": 0,
+              "lte": 105
+            }
+          }
+        },
+        {
+          "terms": {
+            "_id": [ "3", "5" ]
+          }
+        }
+      ]
+    }
+  },
+  "size": 2
+}
+
+
+// To percentage negative value > -95% and < -5%, so that this request returns 3 documents.
+GET products/_search
+{
+  "query": {
+    "bool": {
+      "filter": {"exists": {"field": "id"}},
+      "should": [
+        {"term": {"id": 1}},
+        {"term": {"id": 2}},
+        {"term": {"id": 3}}
+      ],
+      "minimum_should_match": "-90%"
+    }}}
