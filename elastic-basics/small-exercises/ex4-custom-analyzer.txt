@@ -1,0 +1,29 @@
+Create a request to the _analyze endpoint that tests analysis of text “I’m a hungry man” with a custom analyzer.
+This analyzer should use the standard tokenizer and the following token filters:
+lowercase, asciifolding, stop (without customization)
+and the shingle (with unigrams and shingle size from 2 to 4). There should be 9 tokens in the result.
+
+
+GET _analyze
+{
+  "tokenizer": "standard",
+  "filter": [
+    "lowercase",
+    "asciifolding",
+    "stop",
+    {
+      "type": "shingle",
+      "min_shingle_size": 2,
+      "max_shingle_size": 4,
+      "output_unigrams": true
+    }
+  ],
+  "text": "I’m a hungry man"
+}
+
+!!! NOTE !!!
+Usually we don’t use the stop filter. If there is a need to reduce the index size using the stop filter,
+we either don’t use the shingle filter in analyzers where the stop filter is used, or add to ES cluster plugin
+with additional token filter squash_positions that is used between these 2 filters and fix the issue.
+This plugin has been created by our developers and isn’t available on the internet.
+
