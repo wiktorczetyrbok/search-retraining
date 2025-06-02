@@ -24,7 +24,7 @@ public class WordCountProcessorFactory extends UpdateRequestProcessorFactory {
                 if (doc.containsKey(fieldName)) {
                     Object val = doc.getFieldValue(fieldName);
                     if (val instanceof String) {
-                        int wordCount = ((String) val).trim().split("\\s+").length;
+                        int wordCount = ((String) val).isEmpty() ? 0 :((String) val).trim().split("\\s+").length;
                         doc.setField(countFieldName, wordCount);
                     }
                 }
