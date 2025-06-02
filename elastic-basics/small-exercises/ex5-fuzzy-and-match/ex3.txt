@@ -1,0 +1,29 @@
+"category_path": "Women/Women's sneakers & shoes/Women's running shoes",
+"category_path": "Women/Women's sneakers & shoes/Women's running shoes",
+"category_path": "Women/Women's sneakers & shoes/Women's running shoes",
+"category_path": "Women/Women's sneakers & shoes/Women's outdoor shoes",
+"category_path": "Women/Women's sneakers & shoes/Women's outdoor shoes",
+ "category_path": "Women/Women's sneakers & shoes/Women's walking shoes",
+
+Create a search request for  the products index using only one match query by
+the category_path field that contains more than 1 word in the query  and returns all 6 documents.
+----------------------------
+GET products/_mapping
+"category_path": {
+"type": "text",
+"index_options": "docs",
+"norms": false,
+"analyzer": "path-analyzer",
+"search_analyzer": "keyword"
+},
+----------------------------
+final query -- >
+
+GET products/_search
+{
+  "query": {
+    "match": {
+      "category_path": "Women/Women's sneakers & shoes"
+    }
+  }
+}
