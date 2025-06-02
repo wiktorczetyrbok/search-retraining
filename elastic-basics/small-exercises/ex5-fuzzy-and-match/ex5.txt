@@ -1,0 +1,36 @@
+Create a search request for  the products index using a match_prase query
+with parameter query = SILVER METALLIC that returns 3 documents.
+
+          "name": "Nike Odyssey React Shield",
+          "name": "Nike Air Zoom Pegasus 35 Shield",
+          "name": "Nike Free RN 2018 Shield",
+          "name": "TERREX SWIFT R2 MID GTX SHOES",
+          "name": "FIVE TEN MOUNTAIN BIKE FREERIDER SHOES",
+          "name": "EVAZURE DMX LITE 2.0 SHOES",
+
+----------------------------------------------
+"name": {
+  "type": "keyword",
+  "normalizer": "keyword-normalizer",
+  "fields": {
+    "shingles": {
+      "type": "text",
+      "index_options": "docs",
+      "norms": false,
+      "analyzer": "shingle_analyzer"
+    },
+    "text": {
+      "type": "text",
+      "norms": false,
+      "analyzer": "text_analyzer"
+    }}}
+----------------------------------------------
+GET products/_search
+{
+  "query": {
+    "match_phrase": {
+      "name.text": {
+        "query": "nike shield",
+        "slop": 4
+      }
+    }}}
