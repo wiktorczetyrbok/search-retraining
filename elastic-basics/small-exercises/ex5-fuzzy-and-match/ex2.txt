@@ -1,0 +1,19 @@
+Create a search request for  the products index using only one match query with query = WITH that returns all 6 documents.
+ There should be no other parameters in the query.
+
+
+GET products/_search
+{
+  "query": {
+    "match": {
+      "name.text": "shoes shield"
+    }
+  }
+}
+
+
+"shoes shield" is a two-word query.
+
+match query analyzes this input and splits it into tokens: ["shoes", "shield"]
+
+Elasticsearch performs a boolean OR search by default — meaning documents matching either "shoes" or "shield" will be returned.
