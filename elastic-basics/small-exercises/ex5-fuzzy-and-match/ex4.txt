@@ -1,0 +1,13 @@
+Create a search request  for the products index using only one match query
+by the category_path field that returns only 2 documents.
+
+only for outdoors shoes, final query -->>>
+
+GET products/_search
+{
+  "query": {
+    "match": {
+      "category_path": "Women/Women's sneakers & shoes/Women's outdoor shoes"
+    }
+  }
+}
