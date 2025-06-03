@@ -4,23 +4,24 @@
       "type": "text",
       "analyzer": "text_default",
       "index_options": "docs",
-      "norms": false
+      "norms": false,
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        }
+      }
     },
     "imageLocation": {
-      "type": "keyword",
-      "doc_values": false
+      "type": "keyword"
     },
     "destinationUrl": {
-      "type": "keyword",
-      "doc_values": false
+      "type": "keyword"
     },
     "itemCount": {
-      "type": "integer",
-      "doc_values": false
+      "type": "integer"
     },
     "rank": {
-      "type": "float",
-      "doc_values": false
+      "type": "float"
     }
   }
 }
