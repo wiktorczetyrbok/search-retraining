@@ -1,5 +1,5 @@
 com.griddynamics.es.graduation.project:
-  esHost: http://localhost:8200
+  esHost: http://localhost:9200
   user:
   pass:
   index: typeaheads

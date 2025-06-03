@@ -60,13 +60,13 @@
 {"name": "Soccer shoes", "imageLocation": "/img/cat30.png", "destinationUrl": "/-c/-soccer-shoes_cat30_.html", "itemCount": 48, "rank": 24}
 {"create": {"_id": "31"}}
 {"name": "Lifestyle shoes", "imageLocation": "/img/cat31.png", "destinationUrl": "/-c/-lifestyle-shoes_cat31_.html", "itemCount": 229, "rank": 23}
-{"create": {"_id": "31"}}
+{"create": {"_id": "32"}}
 {"name": "Tennis shoes", "imageLocation": "/img/cat32.png", "destinationUrl": "/-c/-tennis-shoes_cat32_.html", "itemCount": 36, "rank": 22}
-{"create": {"_id": "31"}}
+{"create": {"_id": "33"}}
 {"name": "Tops & t-shirts", "imageLocation": "/img/cat33.png", "destinationUrl": "/-c/-tops-and-tshirts_cat33_.html", "itemCount": 463, "rank": 21}
 {"create": {"_id": "34"}}
 {"name": "Shorts", "imageLocation": "/img/cat34.png", "destinationUrl": "/-c/-shorts_cat34_.html", "itemCount": 285, "rank": 20}
-{"create": {"_id" "35"}}
+{"create": {"_id": "35"}}
 {"name": "Pants", "imageLocation": "/img/cat35.png", "destinationUrl": "/-c/-pants_cat35_.html", "itemCount": 382, "rank": 19}
 {"create": {"_id": "36"}}
-{"name": "Jackets", "imageLocation" "/img/cat36.png", "destinationUrl": "/-c/-jackets_cat36_.html", "itemCount": 329, "rank": 18}
+{"name": "Jackets", "imageLocation": "/img/cat36.png", "destinationUrl": "/-c/-jackets_cat36_.html", "itemCount": 329, "rank": 18}

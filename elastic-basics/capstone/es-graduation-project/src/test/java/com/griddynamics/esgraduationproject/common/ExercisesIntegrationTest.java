@@ -26,7 +26,6 @@ public class ExercisesIntegrationTest extends BaseTest {
     }
 
     // TASK 1: Fix 2 bugs in config and recreation/filling of the index.
-    @Ignore
     @Test
     public void testGetAllWorks() {
         client
@@ -40,7 +39,6 @@ public class ExercisesIntegrationTest extends BaseTest {
     }
 
     // TASK 2: Fix bulk data file
-    @Ignore
     @Test
     public void testGetAllReturns36documents() {
         client
@@ -55,7 +53,6 @@ public class ExercisesIntegrationTest extends BaseTest {
     }
 
     // TASK 3: Fix bug in search by text
-    @Ignore
     @Test
     public void testSearchByTextWorks() {
         client
@@ -85,7 +82,6 @@ public class ExercisesIntegrationTest extends BaseTest {
     }
 
     // TASK 4: Change facet bucket definition so that the small bucket contain count > 0
-    @Ignore
     @Test
     public void testSearchByTextReturnsMoreThan0InSmallFacetBucket() {
         client
@@ -104,7 +100,6 @@ public class ExercisesIntegrationTest extends BaseTest {
     // TASK 5: Add a new parameter "considerItemCountInSorting" to the request that change sorting (when it's true)
     // from: _score DESC, rank DESC, _id DESC
     // to: _score DESC, itemCount DESC, _id DESC
-    @Ignore
     @Test
     public void testSortingByItemCountWorks() {
 

@@ -10,7 +10,7 @@
   },
   "analysis": {
     "analyzer": {
-      "txt_default": {
+      "text_default": {
         "type": "custom",
         "tokenizer": "standard",
         "filter": [
