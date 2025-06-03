@@ -1,3 +1,4 @@
+//create a bulk request
 POST my_second_index/_bulk
 {"index": { "_id": "1" }}
 {"text1": "Test_text", "text2": "Another_test_text"}
@@ -5,7 +6,8 @@ POST my_second_index/_bulk
 {"doc": {"text1": "Test_text_UPDATED", "text3": "Just_one_more_text"}}
 
 
-// verify
+//query to  verify -->
+
 GET my_second_index/_search
 {
   "query": {

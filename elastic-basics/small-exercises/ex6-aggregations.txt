@@ -1,0 +1,103 @@
+- Create a search request to the products index using a match_all query and terms aggregation by the category_path field.
+ Try to execute it. Why does it fail with an exception?
+
+query -->
+GET products/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "aggs": {
+    "category_path_agg": {
+      "terms": {
+        "field": "category_path"
+      }
+    }
+  }
+}
+--------------------------------------------------------------------------------------------------------------------
+Exception --> search_phase_execution_exception
+Fielddata is disabled on [category_path] in [products].
+Text fields are not optimised for operations that require per-document field data like aggregations and sorting,
+so these operations are disabled by default. Please use a keyword field instead.
+Alternatively, set fielddata=true on [category_path] in order to load field data by uninverting the inverted index.
+Note that this can use significant memory.
+--------------------------------------------------------------------------------------------------------------------
+
+- Create the same request with a match_all query.
+
+GET products/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "aggs": {
+    "category_path_agg": {
+      "terms": {
+        "field": "category_path.keyword"
+      }}}}
+
+--------------------------------------------------------------------------------------------------------------------
+Add to it aggregations:
+- terms aggregation by name
+- range aggregation by price with ranges: ..70, 70..130, 130..200, 200.. ; ranges must have the following keys in the response: very cheap, cheap, expensive, very expensive
+- sub aggregation in the previous one that is nested aggregation by skus path with terms aggregation by the skus.color field inside it with a reverse_nested aggregation
+- filter aggregation with filter “skus.color = Black” and a stats sub aggregation (it must have “count” in the response > 0).
+
+
+GET products/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "size": 0,
+  "aggs": {
+    "category_path_agg": {
+      "terms": {
+        "field": "category_path.keyword"
+      }
+    },
+    "name_agg": { //agg by name
+      "terms": {
+        "field": "name.keyword"
+      }
+    },
+    "price_ranges": { // agg by price
+      "range": {
+        "field": "price",
+        "keyed": true,
+        "ranges": [
+          { "key": "very cheap", "to": 70 },
+          { "key": "cheap", "from": 70, "to": 130 },
+          { "key": "expensive", "from": 130, "to": 200 },
+          { "key": "very expensive", "from": 200 }
+        ]
+      },
+      "aggs": {
+        "skus_nested": {
+          "nested": {
+            "path": "skus"
+          },
+          "aggs": {
+            "color_of_sku": {
+              "terms": {
+                "field": "skus.color"
+              },
+              "aggs": {
+                "back_to_products": {
+                  "reverse_nested": {}
+                }}}}}}},
+    // stats for black skus
+    "black_skus_filter": {
+      "filter": {
+        "nested": {
+          "path": "skus",
+          "query": {
+            "term": {
+              "skus.color": "black"
+            }}}},
+      "aggs": {
+        "black_skus_stats": {
+          "stats": {
+            "field": "price"
+          }}}}}}

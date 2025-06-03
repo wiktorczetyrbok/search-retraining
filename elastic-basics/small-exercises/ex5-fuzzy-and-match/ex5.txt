@@ -32,5 +32,4 @@ GET products/_search
       "name.text": {
         "query": "nike shield",
         "slop": 4
-      }
-    }}}
+      }}}}
