@@ -118,9 +118,13 @@ public class TypeaheadRepositoryImpl implements TypeaheadRepository {
         // Add sorting and aggregation if necessary
         if (!request.isGetAllRequest()) {
             // Sorting
-            ssb.sort(new ScoreSortBuilder().order(SortOrder.DESC)); // sort by _score DESC
-            ssb.sort(new FieldSortBuilder(RANK_FIELD).order(SortOrder.DESC)); // sort by rank DESC
-            ssb.sort(new FieldSortBuilder(ID_FIELD).order(SortOrder.DESC)); // tie breaker: sort by name keyword DESC
+            ssb.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+            if (request.isConsiderItemCountInSorting()) {
+                ssb.sort(new FieldSortBuilder(ITEM_COUNT_FIELD).order(SortOrder.DESC));
+            } else {
+                ssb.sort(new FieldSortBuilder(RANK_FIELD).order(SortOrder.DESC));
+            }
+            ssb.sort(new FieldSortBuilder(ID_FIELD).order(SortOrder.DESC));
 
             // Aggregation
             List<AggregationBuilder> aggs = createAggs();
