@@ -4,23 +4,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import com.griddynamics.esgraduationproject.infrastructure.TypeaheadIndexManager;
 import com.griddynamics.esgraduationproject.model.TypeaheadServiceRequest;
 import com.griddynamics.esgraduationproject.model.TypeaheadServiceResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.DocWriteRequest;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.CreateIndexRequest;
-import org.elasticsearch.client.indices.CreateIndexResponse;
-import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
@@ -46,12 +41,7 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -73,6 +63,9 @@ public class TypeaheadRepositoryImpl implements TypeaheadRepository {
 
     @Autowired
     private RestHighLevelClient esClient;
+
+    @Autowired
+    private TypeaheadIndexManager indexManager;
 
     @Value("${com.griddynamics.es.graduation.project.index}")
     private String indexName;
@@ -257,63 +250,14 @@ public class TypeaheadRepositoryImpl implements TypeaheadRepository {
 
     @Override
     public void recreateIndex() {
-        if (indexExists(indexName)) {
-            deleteIndex(indexName);
-        }
-
         String settings = getStrFromResource(typeaheadsSettingsFile);
         String mappings = getStrFromResource(typeaheadsMappingsFile);
-        createIndex(indexName, settings, mappings);
+        String newIndex = indexManager.createTimestampedIndex(indexName, settings, mappings);
+        processBulkInsertData(typeaheadsBulkInsertDataFile, newIndex);
 
-        processBulkInsertData(typeaheadsBulkInsertDataFile);
-        try {
-            esClient.indices().refresh(new RefreshRequest(indexName), RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to refresh ES index after bulk insert", e);
-        }
-    }
-
-    private boolean indexExists(String indexName) {
-        GetIndexRequest existsRequest = new GetIndexRequest(indexName);
-
-        try {
-            return esClient.indices().exists(existsRequest, RequestOptions.DEFAULT);
-        } catch (IOException ex) {
-            throw new RuntimeException("Existence checking is failed for index " + indexName, ex);
-        }
-    }
-
-    private void deleteIndex(String indexName) {
-        try {
-            DeleteIndexRequest deleteRequest = new DeleteIndexRequest(indexName);
-            AcknowledgedResponse acknowledgedResponse = esClient.indices().delete(deleteRequest, RequestOptions.DEFAULT);
-            if (!acknowledgedResponse.isAcknowledged()) {
-                log.warn("Index deletion is not acknowledged for indexName: {}", indexName);
-            } else {
-                log.info("Index {} has been deleted.", indexName);
-            }
-        } catch (IOException ex) {
-            throw new RuntimeException("Deleting of old index version is failed for indexName: " + indexName, ex);
-        }
-    }
-
-    private void createIndex(String indexName, String settings, String mappings) {
-        CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName)
-            .mapping(mappings, XContentType.JSON)
-            .settings(settings, XContentType.JSON);
-
-        CreateIndexResponse createIndexResponse;
-        try {
-            createIndexResponse = esClient.indices().create(createIndexRequest, RequestOptions.DEFAULT);
-        } catch (IOException ex) {
-            throw new RuntimeException("An error occurred during creating ES index.", ex);
-        }
-
-        if (!createIndexResponse.isAcknowledged()) {
-            throw new RuntimeException("Creating index not acknowledged for indexName: " + indexName);
-        } else {
-            log.info("Index {} has been created.", indexName);
-        }
+        indexManager.refreshIndex(newIndex);
+        indexManager.switchAliasToNewIndex(indexName, newIndex);
+        indexManager.deleteOldIndices(indexName, 5);
     }
 
     private static String getStrFromResource(Resource resource) {
@@ -327,7 +271,7 @@ public class TypeaheadRepositoryImpl implements TypeaheadRepository {
         }
     }
 
-    private void processBulkInsertData(Resource bulkInsertDataFile) {
+    private void processBulkInsertData(Resource bulkInsertDataFile, String indexName) {
         int requestCnt = 0;
         try {
             BulkRequest bulkRequest = new BulkRequest();
@@ -338,7 +282,7 @@ public class TypeaheadRepositoryImpl implements TypeaheadRepository {
                 if (isNotEmpty(line1) && br.ready()) {
                     requestCnt++;
                     String line2 = br.readLine();
-                    IndexRequest indexRequest = createIndexRequestFromBulkData(line1, line2);
+                    IndexRequest indexRequest = createIndexRequestFromBulkData(line1, line2, indexName);
                     if (indexRequest != null) {
                         bulkRequest.add(indexRequest);
                     }
@@ -361,21 +305,27 @@ public class TypeaheadRepositoryImpl implements TypeaheadRepository {
         }
     }
 
-    private IndexRequest createIndexRequestFromBulkData(String line1, String line2) {
+    private IndexRequest createIndexRequestFromBulkData(String line1, String line2, String fallbackIndexName) {
         DocWriteRequest.OpType opType = null;
-        String esIndexName = null;
+        String esIndexName = fallbackIndexName;
         String esId = null;
         boolean isOk = true;
 
         try {
-            String esOpType = objectMapper.readTree(line1).fieldNames().next();
+            JsonNode metadataNode = objectMapper.readTree(line1);
+            String esOpType = metadataNode.fieldNames().next();
             opType = DocWriteRequest.OpType.fromString(esOpType);
 
-            JsonNode indexJsonNode = objectMapper.readTree(line1).iterator().next().get("_index");
-            esIndexName = (indexJsonNode != null ? indexJsonNode.textValue() : indexName);
+            JsonNode metadataContent = metadataNode.iterator().next();
+            JsonNode indexNode = metadataContent.get("_index");
+            if (indexNode != null && !indexNode.isNull()) {
+                esIndexName = indexNode.asText();
+            }
 
-            JsonNode idJsonNode = objectMapper.readTree(line1).iterator().next().get("_id");
-            esId = (idJsonNode != null ? idJsonNode.textValue() : null);
+            JsonNode idNode = metadataContent.get("_id");
+            if (idNode != null && !idNode.isNull()) {
+                esId = idNode.asText();
+            }
         } catch (IOException | IllegalArgumentException ex) {
             log.warn("An exception occurred during parsing action_and_metadata line in the bulk data file:\n{}\nwith a message:\n{}", line1, ex.getMessage());
             isOk = false;
