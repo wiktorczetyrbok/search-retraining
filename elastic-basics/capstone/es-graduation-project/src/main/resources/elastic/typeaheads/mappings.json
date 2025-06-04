@@ -24,6 +24,7 @@
       "type": "float"
     },
     "id": {
+      "doc_values": true,
       "type": "keyword"
     }
   }

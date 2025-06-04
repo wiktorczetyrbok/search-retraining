@@ -9,6 +9,7 @@ import com.griddynamics.esgraduationproject.model.TypeaheadServiceResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -265,6 +266,11 @@ public class TypeaheadRepositoryImpl implements TypeaheadRepository {
         createIndex(indexName, settings, mappings);
 
         processBulkInsertData(typeaheadsBulkInsertDataFile);
+        try {
+            esClient.indices().refresh(new RefreshRequest(indexName), RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to refresh ES index after bulk insert", e);
+        }
     }
 
     private boolean indexExists(String indexName) {
