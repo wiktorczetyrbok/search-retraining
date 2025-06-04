@@ -65,6 +65,8 @@ public class TypeaheadRepositoryImpl implements TypeaheadRepository {
     private static final String ITEM_COUNT_FIELD = "itemCount";
     private static final String RANK_FIELD = "rank";
     private static final String NAME_KEYWORD = "name.keyword";
+    private static final String ID_FIELD = "_id";
+
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -118,7 +120,7 @@ public class TypeaheadRepositoryImpl implements TypeaheadRepository {
             // Sorting
             ssb.sort(new ScoreSortBuilder().order(SortOrder.DESC)); // sort by _score DESC
             ssb.sort(new FieldSortBuilder(RANK_FIELD).order(SortOrder.DESC)); // sort by rank DESC
-            ssb.sort(new FieldSortBuilder(NAME_KEYWORD).order(SortOrder.DESC)); // tie breaker: sort by name keyword DESC
+            ssb.sort(new FieldSortBuilder(ID_FIELD).order(SortOrder.DESC)); // tie breaker: sort by name keyword DESC
 
             // Aggregation
             List<AggregationBuilder> aggs = createAggs();
@@ -146,9 +148,9 @@ public class TypeaheadRepositoryImpl implements TypeaheadRepository {
             .field(ITEM_COUNT_FIELD)
             .keyed(true)
             .addRange(new RangeAggregator.Range("empty", null, 1.0))
-            .addRange("small", 1.0, 11.0)
-            .addRange("medium", 11.0, 101.0)
-            .addRange(new RangeAggregator.Range("large", 101.0, null));
+            .addRange("small", 1.0, 200.0)
+            .addRange("medium", 200.0, 400.0)
+            .addRange(new RangeAggregator.Range("large", 400.0, null));
         // Stats sub aggregation by the same field
         itemCountAgg.subAggregation(new StatsAggregationBuilder(RANK_STATS_SUB_AGG).field(RANK_FIELD));
 
