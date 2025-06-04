@@ -64,17 +64,17 @@ public class TypeaheadIndexManager {
         }
     }
 
-    public void deleteOldIndices(String alias, int keepCount) {
+    public void deleteOldIndices(String aliasPrefix, int keepCount) {
         try {
-            String aliasPrefix = alias.contains("_") ? alias.substring(0, alias.indexOf('_')) : alias;
-
             GetIndexRequest getRequest = new GetIndexRequest(aliasPrefix + "_*");
             String[] all = esClient.indices().get(getRequest, RequestOptions.DEFAULT).getIndices();
 
             List<String> old = Arrays.stream(all)
+                    .filter(name -> name.matches(aliasPrefix + "_\\d{14}"))
                     .sorted(Comparator.reverseOrder()) // newest first
                     .skip(keepCount)
                     .collect(Collectors.toList());
+
             for (String index : old) {
                 System.out.println("Deleting old index: " + index);
                 esClient.indices().delete(new DeleteIndexRequest(index), RequestOptions.DEFAULT);
