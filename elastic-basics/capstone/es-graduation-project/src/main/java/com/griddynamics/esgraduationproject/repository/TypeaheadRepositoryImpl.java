@@ -255,8 +255,8 @@ public class TypeaheadRepositoryImpl implements TypeaheadRepository {
         String newIndex = indexManager.createTimestampedIndex(indexName, settings, mappings);
         processBulkInsertData(typeaheadsBulkInsertDataFile, newIndex);
 
-        indexManager.refreshIndex(newIndex);
         indexManager.switchAliasToNewIndex(indexName, newIndex);
+        indexManager.refreshIndex(newIndex);
         indexManager.deleteOldIndices(indexName, 5);
     }
 
