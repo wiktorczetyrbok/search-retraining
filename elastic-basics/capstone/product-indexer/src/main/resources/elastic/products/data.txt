@@ -1,0 +1,16 @@
+{"index": {"_id": "1"}}
+{"id": "1", "brand": "Calvin Klein", "name": "Women ankle jeans, model 1272", "price": 149.99, "skus": [{"color": "Black", "size": "S"}, {"color": "Black", "size": "M"}, {"color": "Black", "size": "L"}, {"color": "Blue", "size": "S"}, {"color": "Blue", "size": "M"}, {"color": "Blue", "size": "L"}]}
+{"index": {"_id": "2"}}
+{"id": "2", "brand": "Calvin Klein", "name": "Women ankle skinny jeans, model 1282", "price": 129.99, "skus": [{"color": "Black", "size": "S"}, {"color": "Black", "size": "M"}, {"color": "Black", "size": "L"}, {"color": "Blue", "size": "S"}, {"color": "Blue", "size": "M"}, {"color": "Blue", "size": "L"}, {"color": "White", "size": "S"}, {"color": "White", "size": "M"}, {"color": "Red", "size": "M"}]}
+{"index": {"_id": "3"}}
+{"id": "3", "brand": "Calvin Klein", "name": "Classic women jeans, model 1145", "price": 99.99, "skus": [{"color": "Blue", "size": "XS"}, {"color": "Blue", "size": "S"}, {"color": "Blue", "size": "M"}, {"color": "Blue", "size": "L"}, {"color": "Blue", "size": "XL"}, {"color": "Blue", "size": "XXL"}]}
+{"index": {"_id": "4"}}
+{"id": "4", "brand": "Calvin Klein", "name": "Men ankle jeans, model 2211", "price": 99.99, "skus": [{"color": "Black", "size": "M"}, {"color": "Black", "size": "L"}, {"color": "Black", "size": "XL"}, {"color": "Black", "size": "XXL"}, {"color": "Blue", "size": "M"}, {"color": "Blue", "size": "L"}, {"color": "Blue", "size": "XL"}]}
+{"index": {"_id": "5"}}
+{"id": "5", "brand": "Levi's", "name": "Classic women jeans, model 501", "price": 139.99, "skus": [{"color": "Black", "size": "S"}, {"color": "Black", "size": "M"}, {"color": "Black", "size": "L"}, {"color": "Blue", "size": "S"}, {"color": "Blue", "size": "M"}, {"color": "Blue", "size": "L"}, {"color": "Blue", "size": "XL"}]}
+{"index": {"_id": "6"}}
+{"id": "6", "brand": "Levi's", "name": "Women ankle jeans, model 502", "price": 159.99, "skus": [{"color": "Black", "size": "XS"}, {"color": "Black", "size": "S"}, {"color": "Black", "size": "M"}, {"color": "Black", "size": "L"}, {"color": "Blue", "size": "XS"}, {"color": "Blue", "size": "S"}, {"color": "Blue", "size": "M"}, {"color": "Blue", "size": "L"}]}
+{"index": {"_id": "7"}}
+{"id": "7", "brand": "Levi's", "name": "Classic men jeans, model 501", "price": 135.99, "skus": [{"color": "Black", "size": "M"}, {"color": "Black", "size": "L"}, {"color": "Black", "size": "XL"}, {"color": "Black", "size": "XXL"}, {"color": "Blue", "size": "M"}, {"color": "Blue", "size": "L"}, {"color": "Blue", "size": "XL"}, {"color": "Blue", "size": "XXL"}]}
+{"index": {"_id": "8"}}
+{"id": "8", "brand": "Levi's", "name": "Men ankle jeans, model 502", "price": 155.99, "skus": [{"color": "Black", "size": "S"}, {"color": "Black", "size": "M"}, {"color": "Black", "size": "L"}, {"color": "Black", "size": "XL"}, {"color": "Blue", "size": "S"}, {"color": "Blue", "size": "M"}, {"color": "Blue", "size": "L"}, {"color": "Blue", "size": "XL"}]}
