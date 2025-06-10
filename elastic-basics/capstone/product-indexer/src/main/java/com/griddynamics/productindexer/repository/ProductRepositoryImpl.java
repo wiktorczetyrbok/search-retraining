@@ -56,7 +56,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
         indexManager.switchAliasToNewIndex(indexName, newIndex);
         indexManager.refreshIndex(newIndex);
-        indexManager.deleteOldIndices(indexName, 5);
+        indexManager.deleteOldIndices(indexName, 3);
     }
 
     private static String getStrFromResource(Resource resource) {

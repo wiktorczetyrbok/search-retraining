@@ -4,6 +4,7 @@
   "analysis": {
     "analyzer": {
       "text_analyzer": {
+        "type": "custom",
         "tokenizer": "standard",
         "filter": [
           "lowercase",
@@ -19,12 +20,20 @@
         ]
       }
     },
+    "normalizer": {
+      "keyword-normalizer": {
+        "filter": [
+          "lowercase",
+          "asciifolding"
+        ]
+      }
+    },
     "filter": {
       "shingle_filter": {
         "type": "shingle",
         "min_shingle_size": 2,
         "max_shingle_size": 4,
-        "output_unigrams": true
+        "output_unigrams": false
       }
     }
   }

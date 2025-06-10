@@ -6,7 +6,12 @@
     "brand": {
       "type": "text",
       "analyzer": "text_analyzer",
+      "index_options": "docs",
+      "norms": false,
       "fields": {
+        "raw": {
+          "type": "keyword"
+        },
         "shingles": {
           "type": "text",
           "analyzer": "shingle_analyzer"
@@ -16,6 +21,8 @@
     "name": {
       "type": "text",
       "analyzer": "text_analyzer",
+      "index_options": "docs",
+      "norms": false,
       "fields": {
         "shingles": {
           "type": "text",
@@ -30,10 +37,24 @@
       "type": "nested",
       "properties": {
         "color": {
-          "type": "keyword"
+          "type": "keyword",
+          "doc_values": false,
+          "normalizer": "keyword-normalizer",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
         },
         "size": {
-          "type": "keyword"
+          "type": "keyword",
+          "doc_values": false,
+          "normalizer": "keyword-normalizer",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
         }
       }
     }
