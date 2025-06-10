@@ -4,6 +4,7 @@ import com.griddynamics.productsearchservice.model.FacetBucket;
 import com.griddynamics.productsearchservice.model.ProductSearchRequest;
 import com.griddynamics.productsearchservice.model.ProductSearchResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -57,12 +58,12 @@ public class ProductRepositoryImpl implements ProductRepository {
         int size = Optional.ofNullable(request.getSize()).orElse(10);
         int page = Optional.ofNullable(request.getPage()).orElse(0);
 
-        SearchSourceBuilder ssb = new SearchSourceBuilder()
-                .query(query)
-                .from(page * size)
-                .size(size)
-                .sort(new ScoreSortBuilder().order(SortOrder.DESC))
-                .sort(new FieldSortBuilder("_id").order(SortOrder.DESC));
+        SearchSourceBuilder ssb = new SearchSourceBuilder().query(query).from(page * size).size(size);
+
+        if (!request.isGetAllRequest()) {
+            ssb.sort(new ScoreSortBuilder().order(SortOrder.DESC));
+            ssb.sort(new FieldSortBuilder("id").order(SortOrder.DESC));
+        }
 
         if (!request.isGetAllRequest()) {
             createAggs().forEach(ssb::aggregation);
@@ -79,64 +80,72 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     private static final Set<String> SIZE_TOKENS = Set.of("xxs", "xs", "s", "m", "l", "xl", "xxl", "xxxl");
-    private static final Set<String> COLOR_TOKENS = Set.of("Green", "Black", "White", "Blue", "yellow", "red", "brown", "orange", "grey");
+    private static final Set<String> COLOR_TOKENS = Set.of("green", "black", "white", "blue", "yellow", "red", "brown", "orange", "grey");
 
     private QueryBuilder getQueryByText(String textQuery) {
         if (textQuery == null || textQuery.trim().isEmpty()) {
             return QueryBuilders.boolQuery().mustNot(QueryBuilders.matchAllQuery());
         }
 
-        List<String> tokens = Arrays.stream(textQuery.toLowerCase().split("\\s+")).collect(Collectors.toList());
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        List<String> tokens = Arrays.asList(textQuery.toLowerCase().split("\\s+"));
+        BoolQueryBuilder mainBoolQuery = QueryBuilders.boolQuery();
+
+        BoolQueryBuilder nestedSkuBool = QueryBuilders.boolQuery();
+        boolean hasSkuFilters = false;
 
         for (String token : tokens) {
             if (SIZE_TOKENS.contains(token)) {
-                boolQuery.must(QueryBuilders.termQuery("skus.size.keyword", token).boost(2f));
+                nestedSkuBool.must(QueryBuilders.termQuery("skus.size", token).boost(2f));
+                hasSkuFilters = true;
             } else if (COLOR_TOKENS.contains(token)) {
-                boolQuery.must(QueryBuilders.termQuery("skus.color.keyword", token).boost(3f));
+                nestedSkuBool.must(QueryBuilders.termQuery("skus.color", token).boost(3f));
+                hasSkuFilters = true;
             } else {
-                boolQuery.must(QueryBuilders.multiMatchQuery(token)
+                mainBoolQuery.must(QueryBuilders.multiMatchQuery(token)
                         .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
                         .fields(Map.of("brand", 1f, "name", 1f))
                         .operator(Operator.AND));
-
-                boolQuery.should(QueryBuilders.multiMatchQuery(textQuery)
-                        .type(MultiMatchQueryBuilder.Type.PHRASE)
-                        .fields(Map.of("brand.shingles", 5f, "name.shingles", 5f)));
             }
         }
 
-        return boolQuery;
+        if (hasSkuFilters) {
+            mainBoolQuery.must(QueryBuilders.nestedQuery("skus", nestedSkuBool, ScoreMode.Max));
+        }
+
+        mainBoolQuery.should(QueryBuilders.multiMatchQuery(textQuery).type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
+                .fields(Map.of("brand.shingles", 5f, "name.shingles", 5f)));
+
+        return mainBoolQuery;
     }
+
 
     private List<AggregationBuilder> createAggs() {
         List<AggregationBuilder> aggs = new ArrayList<>();
 
         aggs.add(AggregationBuilders.terms("brand")
-                .field("brand.keyword")
+                .field("brand.raw")
                 .size(20)
-                .order(BucketOrder.count(false)));
+                .order(List.of(BucketOrder.count(false), BucketOrder.key(true))));
 
         aggs.add(AggregationBuilders.range("price")
-                .field("itemCount")
+                .field("price")
                 .keyed(true)
                 .addRange("Cheap", 0, 100)
                 .addRange("Average", 100, 500)
-                .addRange(new RangeAggregator.Range("Expensive", 400.0, null)));
-
+                .addRange(new RangeAggregator.Range("Expensive", 500.0, null)));
 
         aggs.add(AggregationBuilders.nested("skus_nested", "skus")
                 .subAggregation(AggregationBuilders.terms("skus_color")
-                        .field("skus.color.keyword")
+                        .field("skus.color.raw")
                         .size(20)
-                        .order(BucketOrder.count(false))
+                        .order(List.of(BucketOrder.count(false), BucketOrder.key(true)))
                         .subAggregation(new ReverseNestedAggregationBuilder("back_to_product"))));
 
         aggs.add(AggregationBuilders.nested("skus_nested_size", "skus")
                 .subAggregation(AggregationBuilders.terms("skus_size")
-                        .field("skus.size.keyword")
+                        .field("skus.size.raw")
                         .size(20)
-                        .order(BucketOrder.count(false))
+                        .order(List.of(BucketOrder.count(false), BucketOrder.key(true)))
                         .subAggregation(new ReverseNestedAggregationBuilder("back_to_product"))));
 
         return aggs;
