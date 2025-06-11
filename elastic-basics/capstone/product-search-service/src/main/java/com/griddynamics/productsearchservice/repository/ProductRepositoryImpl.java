@@ -96,10 +96,9 @@ public class ProductRepositoryImpl implements ProductRepository {
         for (String token : tokens) {
             if (SIZE_TOKENS.contains(token)) {
                 nestedSkuBool.must(QueryBuilders.termQuery("skus.size", token).boost(2f));
-                hasSkuFilters = true;
+                ///hasSkuFilters = true;
             } else if (COLOR_TOKENS.contains(token)) {
                 nestedSkuBool.must(QueryBuilders.termQuery("skus.color", token).boost(3f));
-                hasSkuFilters = true;
             } else {
                 mainBoolQuery.must(QueryBuilders.multiMatchQuery(token)
                         .type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
@@ -108,9 +107,8 @@ public class ProductRepositoryImpl implements ProductRepository {
             }
         }
 
-        if (hasSkuFilters) {
             mainBoolQuery.must(QueryBuilders.nestedQuery("skus", nestedSkuBool, ScoreMode.Max));
-        }
+
 
         mainBoolQuery.should(QueryBuilders.multiMatchQuery(textQuery).type(MultiMatchQueryBuilder.Type.CROSS_FIELDS)
                 .fields(Map.of("brand.shingles", 5f, "name.shingles", 5f)));
