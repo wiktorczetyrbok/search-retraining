@@ -1,0 +1,31 @@
+{
+  "properties": {
+    "name": {
+      "type": "text",
+      "analyzer": "text_default",
+      "index_options": "docs",
+      "norms": false,
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        }
+      }
+    },
+    "imageLocation": {
+      "type": "keyword"
+    },
+    "destinationUrl": {
+      "type": "keyword"
+    },
+    "itemCount": {
+      "type": "integer"
+    },
+    "rank": {
+      "type": "float"
+    },
+    "id": {
+      "doc_values": true,
+      "type": "keyword"
+    }
+  }
+}
