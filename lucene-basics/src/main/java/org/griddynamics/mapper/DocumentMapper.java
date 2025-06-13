@@ -28,11 +28,8 @@ public class DocumentMapper {
         doc.add(new StoredField("availableTime", timeMillis));
 
         product.getBrands().forEach(brand -> addStringField(doc, "brand", brand));
-
         product.getCategories().forEach(category -> addTextField(doc, "category", category));
-
-        product.getAttributes().forEach((key, attr) ->
-                attr.text().forEach(value -> addStringField(doc, "attributes." + key, value)));
+        product.getAttributes().forEach((key, attr) -> attr.text().forEach(value -> addStringField(doc, "attributes." + key, value)));
         product.getImages().forEach(image -> doc.add(new StoredField("image.uri", image.uri())));
 
         PriceInfo price = product.getPriceInfo();
@@ -48,7 +45,6 @@ public class DocumentMapper {
 
         try {
             Document doc = storedFields.document(docId);
-
             Map<String, String> attributes = extractAttributes(doc);
 
             return ProductResponse.builder()
@@ -63,7 +59,7 @@ public class DocumentMapper {
                     .build();
 
         } catch (IOException e) {
-            throw new RuntimeException("Failed to retrieve document with id " + docId, e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -72,8 +68,7 @@ public class DocumentMapper {
                 .filter(f -> f.name().startsWith("attributes."))
                 .collect(Collectors.groupingBy(
                         f -> f.name().substring("attributes.".length()),
-                        Collectors.mapping(IndexableField::stringValue, Collectors.joining(","))
-                ));
+                        Collectors.mapping(IndexableField::stringValue, Collectors.joining(","))));
     }
 
     private static void addStringField(Document doc, String name, String value) {
@@ -87,6 +82,4 @@ public class DocumentMapper {
             doc.add(new TextField(name, value, Field.Store.YES));
         }
     }
-
-
 }

@@ -1,24 +1,20 @@
 package org.griddynamics.repository;
 
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.document.DoublePoint;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.StoredFields;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
+import org.griddynamics.mapper.DocumentMapper;
 import org.griddynamics.model.ProductResponse;
-import org.griddynamics.model.ProductSearchRequest;
-import org.griddynamics.model.ProductSearchResponse;
-import org.slf4j.LoggerFactory;
+import org.griddynamics.model.SearchRequest;
+import org.griddynamics.model.SearchResponse;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -27,17 +23,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class  ProductSearchRepository {
-
-    private static final Logger log = LoggerFactory.getLogger(ProductSearchRepository.class);
+public class ProductSearchRepository {
 
     @Inject
-    Directory produceDirectory;
-
+    private Analyzer analyzer;
     @Inject
-    Analyzer analyzer;
+    private Directory produceDirectory;
 
-    public ProductSearchResponse getProductsByQuery(ProductSearchRequest request) {
+    public SearchResponse getProductsByQuery(SearchRequest request) {
         try (DirectoryReader reader = DirectoryReader.open(produceDirectory)) {
             IndexSearcher searcher = new IndexSearcher(reader);
             StoredFields storedFields = searcher.storedFields();
@@ -45,25 +38,19 @@ public class  ProductSearchRepository {
             BooleanQuery.Builder finalQueryBuilder = new BooleanQuery.Builder();
 
             MultiFieldQueryParser queryParser = new MultiFieldQueryParser(
-                    new String[]{"title", "description", "category"},
-                    analyzer
-            );
-            Query parsedTextQuery = queryParser.parse(request.textQuery());
+                    new String[]{"title", "description", "category"}, analyzer);
+
+            Query parsedTextQuery = queryParser.parse(request.getTextQuery());
             finalQueryBuilder.add(parsedTextQuery, BooleanClause.Occur.MUST);
 
-            request.filters().ifPresent(filters -> addFilters(filters, finalQueryBuilder));
-
+            request.getFilters().ifPresent(filters -> addFilters(filters, finalQueryBuilder));
             BooleanQuery query = finalQueryBuilder.build();
-            TopDocs topDocs = searcher.search(query, request.size());
 
-            log.info("Found {} document(s) for the query: {}", topDocs.totalHits.value, query);
 
-            return getServiceResponse(topDocs, storedFields);
+            return getServiceResponse(searcher.search(query, request.getSize()), storedFields);
         } catch (IOException e) {
-            log.error("Cannot read index", e);
             throw new RuntimeException(e);
         } catch (ParseException e) {
-            log.error("Cannot parse query: {}", request.textQuery(), e);
             throw new RuntimeException(e);
         }
     }
@@ -76,57 +63,33 @@ public class  ProductSearchRepository {
             String field = entry.getKey();
             String value = entry.getValue();
 
-            switch (field) {
-                case "brand" -> finalQueryBuilder.add(new TermQuery(new Term(field, value)), BooleanClause.Occur.FILTER);
-                case "priceFrom" -> minPrice = Double.parseDouble(value);
-                case "priceTo" -> maxPrice = Double.parseDouble(value);
-                default -> finalQueryBuilder.add(
-                        new TermQuery(new Term("attributes." + field, value)), BooleanClause.Occur.FILTER
-                );
+            if ("brand".equals(field)) {
+                finalQueryBuilder.add(new TermQuery(new Term(field, value)), BooleanClause.Occur.FILTER);
+            } else if ("priceFrom".equals(field)) {
+                minPrice = Double.parseDouble(value);
+            } else if ("priceTo".equals(field)) {
+                maxPrice = Double.parseDouble(value);
+            } else {
+                finalQueryBuilder.add(new TermQuery(new Term("attributes." + field, value)), BooleanClause.Occur.FILTER);
             }
         }
 
+        applyPriceFilter(finalQueryBuilder, minPrice, maxPrice);
+    }
+
+    private void applyPriceFilter(BooleanQuery.Builder finalQueryBuilder, double minPrice, double maxPrice) {
         if (minPrice != Double.NEGATIVE_INFINITY || maxPrice != Double.POSITIVE_INFINITY) {
             Query priceRangeQuery = DoublePoint.newRangeQuery("price", minPrice, maxPrice);
             finalQueryBuilder.add(priceRangeQuery, BooleanClause.Occur.FILTER);
         }
     }
 
-    private ProductSearchResponse getServiceResponse(TopDocs topDocs, StoredFields storedFields) {
+    private SearchResponse getServiceResponse(TopDocs topDocs, StoredFields storedFields) {
         long totalHits = topDocs.totalHits.value;
 
         List<ProductResponse> products = Arrays.stream(topDocs.scoreDocs)
-                .map(sd -> {
-                    int docId = sd.doc;
-                    float score = sd.score;
-
-                    try {
-                        Document doc = storedFields.document(docId);
-
-                        Map<String, String> attributes = doc.getFields().stream()
-                                .filter(f -> f.name().startsWith("attributes."))
-                                .collect(Collectors.groupingBy(
-                                        f -> f.name().substring("attributes.".length()),
-                                        Collectors.mapping(IndexableField::stringValue, Collectors.joining(","))
-                                ));
-
-                        return ProductResponse.builder()
-                                .score(score)
-                                .id(doc.get("id"))
-                                .title(doc.get("title"))
-                                .description(doc.get("description"))
-                                .price(doc.get("price"))
-                                .currencyCode(doc.get("currencyCode"))
-                                .category(doc.get("category"))
-                                .attributes(attributes)
-                                .build();
-                    } catch (IOException e) {
-                        log.error("Cannot read docId: {}", docId, e);
-                        throw new RuntimeException(e);
-                    }
-                })
+                .map(scoreDoc -> DocumentMapper.mapToResponse(scoreDoc, storedFields))
                 .collect(Collectors.toList());
-
-        return new ProductSearchResponse(totalHits, products);
+        return new SearchResponse(totalHits, products);
     }
 }

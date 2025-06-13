@@ -4,13 +4,11 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.griddynamics.model.Product;
-import org.griddynamics.model.ProductSearchRequest;
-import org.griddynamics.model.ProductSearchResponse;
+import org.griddynamics.model.SearchRequest;
+import org.griddynamics.model.SearchResponse;
 import org.griddynamics.service.ProductService;
 
-
-@Path("/lucene-basics/products")
+@Path("/lucene/products")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProductController {
@@ -19,8 +17,17 @@ public class ProductController {
     ProductService productService;
 
     @POST
+    @Path("/index")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response createIndex() {
+        Integer indexedDocs = productService.createIndex();
+        return Response.ok("Indexed " + indexedDocs + " documents.").build();
+    }
+
+
+    @POST
     @Path("/search")
-    public ProductSearchResponse getSearchServiceResponse(ProductSearchRequest request) {
+    public SearchResponse getSearchServiceResponse(SearchRequest request) {
         return productService.searchProducts(request);
     }
 
@@ -31,16 +38,4 @@ public class ProductController {
         return Response.noContent().build();
     }
 
-    @POST
-    public Response updateProduct(Product product) {
-        productService.updateProduct(product);
-        return Response.noContent().build();
-    }
-
-    @POST
-    @Path("/index")
-    public Response createIndex() {
-        productService.createIndex();
-        return Response.noContent().build();
-    }
 }
