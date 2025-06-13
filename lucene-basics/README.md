@@ -1,120 +1,94 @@
-# lucene-basics
+To deploy to cloud run use gcloud.sh script first and then deploy.sh
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+id, name, uri:
+Stored using StringField. Used for identification and display purposes; not tokenized.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+title, description:
+Stored and indexed using TextField with tokenization. These fields are full-text searchable with the analyzer.
 
-## Running the application in dev mode
+availableTime:
+indexed as a LongPoint for filtering/sorting and stored separately using StoredField for retrieval.
 
-You can run your application in dev mode that enables live coding using:
+brand:
+indexed as StringField, allowing exact match filtering.
 
-```shell script
-./mvnw quarkus:dev
-```
+category:
+indexed as TextField, allowing partial and tokenized search on product categories.
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+attributes.*:
+flattened and indexed using StringField (attributes.color, attributes.waffleshape)m for queries like color:Silver
 
-## Packaging and running the application
+price:
+Indexed using DoublePoint to enable numeric range queries (price: 50 to 150), stored using StoredField so it can be shown in results.
 
-The application can be packaged using:
+currencyCode:
+Stored using StringField for display or filtering.
 
-```shell script
-./mvnw package
-```
+image.uri:
+Stored using StoredField, used for display in search results.
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+Queries tested with swagger url ```{Service URL}/q/swagger-ui``` :
+### exact title scores the highest, also considers simmilar products
+{
+"textQuery": "Cuisinart Mini Waffle Maker",
+"filters": null,
+"size": 10
+}
 
-If you want to build an _über-jar_, execute the following command:
+### edge case - no vaccums in products - 0 results
+{
+"textQuery": "Vaccum",
+"filters": null,
+"size": 10
+}
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
+### edge case - only 1 blender in products - 1 result
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+{
+"textQuery": "blender",
+"filters": null,
+"size": 10
+}
 
-## Creating a native executable
+### brand filter
+{
+"textQuery": "Waffle",
+"filters": {
+"brand": "Cuisinart"
+},
+"size": 10
+}
 
-You can create a native executable using:
 
-```shell script
-./mvnw package -Dnative
-```
+### price filter
+{
+"textQuery": "Waffle",
+"filters": {
+"priceFrom": "50",
+"priceTo": "100"
+},
+"size": 10
+}
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+### attribute filter
+{
+"textQuery": "Waffle",
+"filters": {
+"waffleshape": "Round"
+},
+"size": 10
+}
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
+### multiword query parser - from description
+{
+"textQuery": "The Krups Waffle Maker features adjustable browning settings",
+"filters": {
+"wattage": "1000 Watts"
+},
+"size": 5
+}
 
-You can then execute your native executable with: `./target/lucene-basics-1.0.0-SNAPSHOT-runner`
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
 
-## Related Guides
 
-- Lucene ([guide](https://github.com/quarkiverse/quarkus-lucene)): Add full-text search capabilities to your application with Apache Lucene.
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- OpenAPI Generator - REST Client Generator ([guide](https://docs.quarkiverse.io/quarkus-openapi-generator/dev/index.html)): Generation of Rest Clients based on OpenAPI specification files
-
-## Provided Code
-
-### OpenAPI Generator Client Codestart
-
-Start to code with the OpenAPI Generator Client extension.
-
-[Related guide section...](https://docs.quarkiverse.io/quarkus-openapi-generator/dev/client.html)
-
-## Requirements
-
-If you do not have added the `io.quarkus:quarkus-rest-client-jackson` or `io.quarkus:quarkus-rest-client-reactive-jackson` extension in your project, add it first:
-
-Remember, you just need to add one of them, depending on your needs.
-
-### REST Client Jackson:
-
-Quarkus CLI:
-
-```bash
-quarkus ext add io.quarkus:quarkus-rest-client-jackson
-```
-
-Maven:
-```bash
-./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-rest-client-jackson"
-```
-
-Gradle:
-
-```bash
-./gradlew addExtension --extensions="io.quarkus:quarkus-rest-client-jackson"
-```
-
-or
-
-### REST Client Reactive Jackson:
-
-Quarkus CLI:
-
-```bash
-quarkus ext add io.quarkus:quarkus-rest-client-reactive-jackson
-```
-
-Maven:
-
-```bash
-./mvnw quarkus:add-extension -Dextensions="io.quarkus:quarkus-rest-client-reactive-jackson"
-```
-
-Gradle:
-
-```bash
-./gradlew addExtension --extensions="io.quarkus:quarkus-rest-client-reactive-jackson"
-```
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
