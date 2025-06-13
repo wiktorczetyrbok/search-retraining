@@ -12,7 +12,7 @@ import java.nio.file.Path;
 
 
 @ApplicationScoped
-public class LuceneProducer {
+public class LuceneConfig {
 
     @Produces
     public Analyzer analyzer() {
