@@ -89,6 +89,11 @@ Queries tested with swagger url ```{Service URL}/q/swagger-ui``` :
 "size": 5
 }
 
+### combination from title, description and category
 
+{
+"textQuery": "Dyson cordless vacuum advanced suction long battery carpet crevice tool",
+"size": 10
+}
 
 
