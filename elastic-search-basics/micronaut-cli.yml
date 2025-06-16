@@ -1,0 +1,6 @@
+applicationType: default
+defaultPackage: com.griddynamics
+testFramework: junit
+sourceLanguage: java
+buildTool: maven
+features: [app-name, elasticsearch, http-client, jackson-databind, java, java-application, junit, logback, maven, maven-enforcer-plugin, micronaut-aot, micronaut-http-validation, netty-server, openapi, properties, readme, shade, static-resources]
