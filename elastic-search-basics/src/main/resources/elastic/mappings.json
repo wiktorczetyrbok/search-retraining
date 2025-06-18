@@ -1,0 +1,32 @@
+{
+  "properties": {
+    "title": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        }
+      }
+    },
+    "authors": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        }
+      }
+    },
+    "summary": {
+      "type": "text"
+    },
+    "genres": {
+      "type": "keyword"
+    },
+    "publisher": {
+      "type": "keyword"
+    },
+    "publishYear": {
+      "type": "integer"
+    }
+  }
+}
