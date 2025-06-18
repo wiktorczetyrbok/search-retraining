@@ -1,7 +1,7 @@
 package com.griddynamics.controller;
 
 import com.griddynamics.model.BookSearchRequest;
-import com.griddynamics.model.BookSearchResponse;
+import com.griddynamics.model.BookSearchResult;
 import com.griddynamics.service.BookService;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.*;
@@ -20,7 +20,7 @@ public class BookController {
     @Post("/search")
     @Consumes("application/json")
     @Produces("application/json")
-    public BookSearchResponse searchBooks(@Body BookSearchRequest request) {
+    public BookSearchResult searchBooks(@Body BookSearchRequest request) {
         return bookService.searchBooks(request);
     }
 

@@ -29,28 +29,23 @@ public class BookRepository {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger log = Logger.getLogger(BookRepository.class.getName());
+    private final RestHighLevelClient esClient;
+    private final BookIndexManager indexManager;
+    private final ResourceLoader resourceLoader;
+    @Value("${com.griddynamics.es.graduation.project.index}")
+    private String indexName;
+    @Value("${files.mappings:classpath:elastic/mappings.json}")
+    private String mappingsPath;
+    @Value("${files.settings:classpath:elastic/settings.json}")
+    private String settingsPath;
+    @Value("${files.bulkData:classpath:elastic/books.ndjson}")
+    private String bulkDataPath;
 
     public BookRepository(RestHighLevelClient esClient, BookIndexManager indexManager, ResourceLoader resourceLoader) {
         this.esClient = esClient;
         this.indexManager = indexManager;
         this.resourceLoader = resourceLoader;
     }
-
-    private final RestHighLevelClient esClient;
-    private final BookIndexManager indexManager;
-    private final ResourceLoader resourceLoader;
-
-    @Value("${com.griddynamics.es.graduation.project.index}")
-    private String indexName;
-
-    @Value("${files.mappings:classpath:elastic/mappings.json}")
-    private String mappingsPath;
-
-    @Value("${files.settings:classpath:elastic/settings.json}")
-    private String settingsPath;
-
-    @Value("${files.bulkData:classpath:elastic/books.ndjson}")
-    private String bulkDataPath;
 
     public void recreateIndex() {
         String settings = getStrFromResource(settingsPath);
