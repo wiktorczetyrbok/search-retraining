@@ -1,0 +1,28 @@
+#full-text query only
+
+curl -X POST http://localhost:8080/elastic-basics/books/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "textQuery": "history medieval",
+    "authorFilter": null,
+    "genreFilter": null
+}'
+
+
+# Search with full-text and genre filter
+curl -X POST http://localhost:8080/elastic-basics/books/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "textQuery": "quantum physics",
+    "authorFilter": null,
+    "genreFilter": "non-fiction"
+}'
+
+# empty search query to test genre breakdown
+curl --location 'http://localhost:8080/elastic-basics/books/search' \
+--header 'Content-Type: application/json' \
+--data '{
+    "textQuery": "",
+    "authorFilter": null,
+    "genreFilter": null
+}'

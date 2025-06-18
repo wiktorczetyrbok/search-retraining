@@ -5,6 +5,10 @@
       "fields": {
         "keyword": {
           "type": "keyword"
+        },
+        "keyword_lower": {
+          "type": "keyword",
+          "normalizer": "lowercase_normalizer"
         }
       }
     },
@@ -13,6 +17,10 @@
       "fields": {
         "keyword": {
           "type": "keyword"
+        },
+        "keyword_lower": {
+          "type": "keyword",
+          "normalizer": "lowercase_normalizer"
         }
       }
     },
@@ -20,10 +28,12 @@
       "type": "text"
     },
     "genres": {
-      "type": "keyword"
+      "type": "keyword",
+      "normalizer": "lowercase_normalizer"
     },
     "publisher": {
-      "type": "keyword"
+      "type": "keyword",
+      "normalizer": "lowercase_normalizer"
     },
     "publishYear": {
       "type": "integer"
