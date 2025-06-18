@@ -1,0 +1,79 @@
+micronaut:
+  application:
+    name: bookstore
+  server:
+    port: 8080
+
+  openapi:
+    views:
+      spec: rapidoc.enabled=true
+  router:
+    static-resources:
+      swagger:
+        paths: classpath:META-INF/swagger
+        mapping: /swagger/**
+      swagger-ui:
+        paths: classpath:META-INF/swagger/views/swagger-ui
+        mapping: /swagger-ui/**
+    intercept-url-map:
+      - pattern: /swagger/**
+        http-method: GET
+        access:
+          - isAnonymous()
+      - pattern: /swagger-ui/**
+        http-method: GET
+        access:
+          - isAnonymous()
+com:
+  griddynamics:
+    es:
+      graduation:
+        project:
+          es-host: http://localhost:9200
+          user: ""
+          pass: ""
+          index: wczet-books
+files:
+  mappings: classpath:elastic/mappings.json
+  settings: classpath:elastic/settings.json
+  bulkData: classpath:elastic/books.ndjson
+
+swagger:
+  enabled: true
+
+openapi:
+  enabled: true
+  views:
+    swagger-ui:
+      enabled: true
+
+endpoints:
+  all:
+    enabled: true
+    sensitive: false
+
+---
+micronaut:
+  environments: local
+
+com:
+  griddynamics:
+    es:
+      graduation:
+        project:
+          es-host: http://localhost:9200
+          user: ""
+          pass: ""
+
+---
+micronaut:
+  environments: cloud
+
+com:
+  griddynamics:
+    es:
+      graduation:
+        project:
+          es-host: http://34.65.46.77:9200
+          user:
+          pass:
