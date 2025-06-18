@@ -51,3 +51,29 @@ endpoints:
   all:
     enabled: true
     sensitive: false
+
+---
+micronaut:
+  environments: local
+
+com:
+  griddynamics:
+    es:
+      graduation:
+        project:
+          es-host: http://localhost:9200
+          user: ""
+          pass: ""
+
+---
+micronaut:
+  environments: cloud
+
+com:
+  griddynamics:
+    es:
+      graduation:
+        project:
+          es-host: http://34.65.46.77:9200
+          user:
+          pass:
