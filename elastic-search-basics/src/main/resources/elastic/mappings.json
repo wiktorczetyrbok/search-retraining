@@ -1,0 +1,42 @@
+{
+  "properties": {
+    "title": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        },
+        "keyword_lower": {
+          "type": "keyword",
+          "normalizer": "lowercase_normalizer"
+        }
+      }
+    },
+    "authors": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        },
+        "keyword_lower": {
+          "type": "keyword",
+          "normalizer": "lowercase_normalizer"
+        }
+      }
+    },
+    "summary": {
+      "type": "text"
+    },
+    "genres": {
+      "type": "keyword",
+      "normalizer": "lowercase_normalizer"
+    },
+    "publisher": {
+      "type": "keyword",
+      "normalizer": "lowercase_normalizer"
+    },
+    "publishYear": {
+      "type": "integer"
+    }
+  }
+}
