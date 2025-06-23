@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.griddynamics.productindexer.infrastructure.ProductIndexManager;
+import com.griddynamics.productindexer.model.Event;
+import com.griddynamics.productindexer.model.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -58,6 +62,61 @@ public class ProductRepositoryImpl implements ProductRepository {
         indexManager.refreshIndex(newIndex);
         indexManager.deleteOldIndices(indexName, 3);
     }
+
+    @Override
+    public UpdateResult processUpdateEvents(List<Event> events) {
+        Set<String> indexedFields = Set.of("price", "stock", "description");
+        Map<String, Event> deduplicated = new LinkedHashMap<>();
+
+        int skippedUnindexed = 0;
+        int skippedUnchanged = 0;
+        int updated = 0;
+
+        for (Event event : events) {
+            if (!indexedFields.contains(event.getField())) {
+                skippedUnindexed++;
+                continue;
+            }
+
+            String key = event.getId() + ":" + event.getField();
+            if (deduplicated.containsKey(key)) {
+                Event existing = deduplicated.get(key);
+                deduplicated.put(key, new Event(event.getId(), event.getField(), existing.getBefore(), event.getAfter()));
+            } else {
+                deduplicated.put(key, event);
+            }
+        }
+
+        for (Event event : deduplicated.values()) {
+            if (!Objects.equals(event.getBefore(), event.getAfter())) {
+                try {
+                    UpdateRequest updateRequest = new UpdateRequest(indexName, String.valueOf(event.getId()))
+                            .doc(Map.of(event.getField(), event.getAfter()))
+                            .docAsUpsert(true);
+
+                    esClient.update(updateRequest, RequestOptions.DEFAULT);
+                    updated++;
+                    log.info("Updated product {} field '{}' → {}", event.getId(), event.getField(), event.getAfter());
+                } catch (Exception e) {
+                    log.error("Failed to update product {} field '{}': {}", event.getId(), event.getField(), e.getMessage());
+                }
+            } else {
+                skippedUnchanged++;
+                log.info("Skipped product {} field '{}' (no change)", event.getId(), event.getField());
+            }
+        }
+
+        return new UpdateResult(
+                events.size(),
+                deduplicated.size(),
+                skippedUnchanged,
+                skippedUnindexed,
+                updated
+        );
+    }
+
+
+
 
     private static String getStrFromResource(Resource resource) {
         try {
