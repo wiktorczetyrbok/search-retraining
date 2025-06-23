@@ -56,6 +56,7 @@ public class ProductRepositoryImpl implements ProductRepository {
         String settings = getStrFromResource(productsSettingsFile);
         String mappings = getStrFromResource(productsMappingsFile);
         String newIndex = indexManager.createTimestampedIndex(indexName, settings, mappings);
+        System.out.println(mappings);
         processBulkInsertData(productsBulkInsertDataFile, newIndex);
 
         indexManager.switchAliasToNewIndex(indexName, newIndex);
@@ -65,7 +66,15 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public UpdateResult processUpdateEvents(List<Event> events) {
-        Set<String> indexedFields = Set.of("price", "stock", "description");
+        Set<String> indexedFields = Set.of( "id",
+                "name",
+                "description",
+                "category",
+                "brand",
+                "price",
+                "currency",
+                "available",
+                "stock");
         Map<String, Event> deduplicated = new LinkedHashMap<>();
 
         int skippedUnindexed = 0;

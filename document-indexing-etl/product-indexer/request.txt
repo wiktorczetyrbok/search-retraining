@@ -1,3 +1,5 @@
+
+
 curl --location 'https://wczetyrbok-es-etl-updates-505700148988.europe-west6.run.app/triggerUpdates' \
 --header 'Content-Type: application/json' \
 --header 'Accept: application/json' \
@@ -17,4 +19,17 @@ curl --location 'https://wczetyrbok-es-etl-updates-505700148988.europe-west6.run
     "skippedUnchanged": 0,
     "skippedUnindexed": 1,
     "updated": 3
+}
+
+## Kibana request to check the version
+GET wczet-products/_search
+{
+  "size": 10,
+  "query": {
+    "terms": {
+      "id":  ["1","0", "3", "4"]
+
+    }
+  },
+    "version": true
 }
