@@ -1,0 +1,20 @@
+curl --location 'https://wczetyrbok-es-etl-updates-505700148988.europe-west6.run.app/triggerUpdates' \
+--header 'Content-Type: application/json' \
+--header 'Accept: application/json' \
+--data '[
+  { "id": 0, "field": "price", "before": 100, "after": 80 }, //simple change
+  { "id": 0, "field": "price", "before": 80, "after": 80 }, //no change
+  { "id": 1, "field": "stock", "before": 50, "after": 49 },
+  { "id": 1, "field": "stock", "before": 49, "after": 48 }, //rapid succession
+  { "id": 3, "field": "description", "before": "old desc", "after": "new desc" }, // indexed field
+  { "id": 4, "field": "internal_note", "before": "abc", "after": "xyz" }  // not indexed
+]
+'
+## Response
+{
+    "totalEvents": 6,
+    "processedEvents": 3,
+    "skippedUnchanged": 0,
+    "skippedUnindexed": 1,
+    "updated": 3
+}

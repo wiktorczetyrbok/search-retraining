@@ -12,3 +12,9 @@ com.griddynamics.es.graduation.project:
 spring:
   application:
     name: product-indexer
+
+---
+
+spring.config.activate.on-profile: cloud
+com.griddynamics.es.graduation.project:
+  esHost: http://34.65.46.77:9200
