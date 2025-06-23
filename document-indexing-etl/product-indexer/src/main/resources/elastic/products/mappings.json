@@ -3,6 +3,31 @@
     "id": {
       "type": "keyword"
     },
+    "name": {
+      "type": "text",
+      "analyzer": "text_analyzer",
+      "index_options": "docs",
+      "norms": false,
+      "fields": {
+        "shingles": {
+          "type": "text",
+          "analyzer": "shingle_analyzer"
+        }
+      }
+    },
+    "description": {
+      "type": "text",
+      "analyzer": "text_analyzer"
+    },
+    "category": {
+      "type": "text",
+      "analyzer": "text_analyzer",
+      "fields": {
+        "raw": {
+          "type": "keyword"
+        }
+      }
+    },
     "brand": {
       "type": "text",
       "analyzer": "text_analyzer",
@@ -18,20 +43,20 @@
         }
       }
     },
-    "name": {
-      "type": "text",
-      "analyzer": "text_analyzer",
-      "index_options": "docs",
-      "norms": false,
-      "fields": {
-        "shingles": {
-          "type": "text",
-          "analyzer": "shingle_analyzer"
-        }
-      }
-    },
     "price": {
       "type": "float"
+    },
+    "currency": {
+      "type": "keyword"
+    },
+    "available": {
+      "type": "boolean"
+    },
+    "stock": {
+      "type": "integer"
+    },
+    "last_updated": {
+      "type": "date"
     },
     "skus": {
       "type": "nested",

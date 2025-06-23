@@ -44,7 +44,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     private Resource productsMappingsFile;
     @Value("${com.griddynamics.es.graduation.project.files.settings:classpath:elastic/products/settings.json}")
     private Resource productsSettingsFile;
-    @Value("${com.griddynamics.es.graduation.project.files.bulkData:classpath:elastic/products/data.txt}")
+    @Value("${com.griddynamics.es.graduation.project.files.bulkData:classpath:elastic/products/product_catalog.ndjson}")
     private Resource productsBulkInsertDataFile;
 
     @Override
