@@ -1,0 +1,21 @@
+{
+  "dynamic": false,
+  "properties": {
+    "gender": {
+      "type": "text",
+      "analyzer": "product_ana"
+    },
+    "topic": {
+      "type": "text",
+      "analyzer": "product_ana"
+    },
+    "sign": {
+      "type": "text",
+      "analyzer": "product_ana"
+    },
+    "text": {
+      "type": "text",
+      "analyzer": "product_ana"
+    }
+  }
+}
