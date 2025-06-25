@@ -1,0 +1,184 @@
+
+
+curl --location 'https://wczetyrbok-es-etl-updates-505700148988.europe-west6.run.app/triggerUpdates' \
+--header 'Content-Type: application/json' \
+--header 'Accept: application/json' \
+--data '[
+  { "id": 0, "field": "price", "before": 100, "after": 80 }, //simple change
+  { "id": 0, "field": "price", "before": 80, "after": 80 }, //no change
+  { "id": 1, "field": "stock", "before": 50, "after": 49 },
+  { "id": 1, "field": "stock", "before": 49, "after": 48 }, //rapid succession
+  { "id": 3, "field": "description", "before": "old desc", "after": "new desc" }, // indexed field
+  { "id": 4, "field": "internal_note", "before": "abc", "after": "xyz" }  // not indexed
+]
+'
+## Response
+{
+    "totalEvents": 6,
+    "processedEvents": 3,
+    "skippedUnchanged": 0,
+    "skippedUnindexed": 1,
+    "updated": 3
+}
+
+## Kibana request to check the version
+GET wczet-products/_search
+{
+  "size": 10,
+  "query": {
+    "terms": {
+      "id":  ["1","0", "3", "4"]
+
+    }
+  },
+    "version": true
+}
+## result
+
+{
+  "took": 33,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 4,
+      "relation": "eq"
+    },
+    "max_score": 1,
+    "hits": [
+      {
+        "_index": "wczet-products_20250623123749",
+        "_id": "4",
+        "_version": 1,
+        "_score": 1,
+        "_source": {
+          "id": "4",
+          "name": "Grass-roots client-driven encoding",
+          "description": "The nothing sign remember close ask.",
+          "category": "study > candidate > address",
+          "brand": "Butler, Smith and Smith",
+          "price": 270.66,
+          "currency": "USD",
+          "available": true,
+          "stock": 87,
+          "last_updated": "2025-06-23T09:04:59.047141Z",
+          "skus": [
+            {
+              "color": "AliceBlue",
+              "size": "XL"
+            },
+            {
+              "color": "AliceBlue",
+              "size": "XS"
+            },
+            {
+              "color": "Wheat",
+              "size": "XL"
+            },
+            {
+              "color": "Wheat",
+              "size": "XS"
+            }
+          ]
+        }
+      },
+      {
+        "_index": "wczet-products_20250623123749",
+        "_id": "0",
+        "_version": 2,
+        "_score": 1,
+        "_source": {
+          "id": "0",
+          "name": "Networked well-modulated instruction set",
+          "description": "Whole magazine truth stop whose.",
+          "category": "behavior > style > report",
+          "brand": "Garrett, Salazar and Clayton",
+          "price": 80,        /////////////////////////// price changed to 80
+          "currency": "USD",
+          "available": true,
+          "stock": 97,
+          "last_updated": "2025-06-23T09:04:59.046233Z",
+          "skus": [
+            {
+              "color": "MediumSeaGreen",
+              "size": "M"
+            },
+            {
+              "color": "LemonChiffon",
+              "size": "M"
+            }
+          ]
+        }
+      },
+      {
+        "_index": "wczet-products_20250623123749",
+        "_id": "1",
+        "_version": 2,
+        "_score": 1,
+        "_source": {
+          "id": "1",
+          "name": "Upgradable fresh-thinking strategy",
+          "description": "True develop sound central myself. Ball floor meet usually.",
+          "category": "almost > wonder > employee",
+          "brand": "Davis and Sons",
+          "price": 289.98,
+          "currency": "USD",
+          "available": true,
+          "stock": 48,          //////////////////////// stock updated to 48
+          "last_updated": "2025-06-23T09:04:59.046638Z",
+          "skus": [
+            {
+              "color": "DeepPink",
+              "size": "L"
+            },
+            {
+              "color": "DeepPink",
+              "size": "M"
+            },
+            {
+              "color": "Blue",
+              "size": "L"
+            },
+            {
+              "color": "Blue",
+              "size": "M"
+            }
+          ]
+        }
+      },
+      {
+        "_index": "wczet-products_20250623123749",
+        "_id": "3",
+        "_version": 2,
+        "_score": 1,
+        "_source": {
+          "id": "3",
+          "name": "Monitored intermediate contingency",
+          "description": "new desc", ///////////////////////////////// updated description
+          "category": "check > real > leader",
+          "brand": "Rogers Inc",
+          "price": 189.33,
+          "currency": "USD",
+          "available": true,
+          "stock": 32,
+          "last_updated": "2025-06-23T09:04:59.046916Z",
+          "skus": [
+            {
+              "color": "YellowGreen",
+              "size": "XS"
+            },
+            {
+              "color": "YellowGreen",
+              "size": "XXL"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
