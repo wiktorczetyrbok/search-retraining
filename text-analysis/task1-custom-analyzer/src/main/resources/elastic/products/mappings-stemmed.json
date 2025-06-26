@@ -3,11 +3,12 @@
   "properties": {
     "topic": {
       "type": "text",
-      "analyzer": "product_ana"
+      "analyzer": "stemmed_ana"
     },
     "text": {
       "type": "text",
-      "analyzer": "product_ana"
+      "analyzer": "stemmed_ana"
     }
   }
 }
+
