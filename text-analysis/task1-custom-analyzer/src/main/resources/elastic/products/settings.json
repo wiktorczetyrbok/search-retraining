@@ -6,21 +6,12 @@
       "product_ana": {
         "type": "custom",
         "tokenizer": "standard",
-        "filter": [
-          "lowercase",
-          "asciifolding",
-          "english_stop"
-        ]
+        "filter": ["lowercase", "asciifolding", "english_stop"]
       },
       "stemmed_ana": {
         "type": "custom",
         "tokenizer": "standard",
-        "filter": [
-          "lowercase",
-          "asciifolding",
-          "english_stop",
-          "english_stemmer"
-        ]
+        "filter": ["lowercase", "english_stemmer"]
       }
     },
     "filter": {

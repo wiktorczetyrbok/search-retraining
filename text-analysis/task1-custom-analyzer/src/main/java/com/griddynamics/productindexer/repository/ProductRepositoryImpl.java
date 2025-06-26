@@ -40,7 +40,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     private String indexName;
 
     // Mappings, settings and bulk data files
-    @Value("${com.griddynamics.es.graduation.project.files.mappings:classpath:elastic/products/mappings.json}")
+    @Value("${com.griddynamics.es.graduation.project.files.mappings}")
     private Resource productsMappingsFile;
     @Value("${com.griddynamics.es.graduation.project.files.settings:classpath:elastic/products/settings.json}")
     private Resource productsSettingsFile;
