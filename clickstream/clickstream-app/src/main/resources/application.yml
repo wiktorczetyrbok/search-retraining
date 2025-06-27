@@ -1,0 +1,16 @@
+com.griddynamics.es.graduation.project:
+  esHost: http://localhost:9200
+  user:
+  pass:
+  index: products-ship
+
+  files:
+    mappings: classpath:elastic/products/mappings.json
+    settings: classpath:elastic/products/settings.json
+    bulkData: classpath:elastic/products/products.ndjson
+
+spring:
+  application:
+    name: clickstream-app
+server:
+  port: 8080
