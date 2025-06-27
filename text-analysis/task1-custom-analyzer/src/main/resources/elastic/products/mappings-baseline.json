@@ -3,15 +3,16 @@
   "properties": {
     "topic": {
       "type": "text",
-      "analyzer": "product_ana"
+      "analyzer": "standard"
     },
     "text": {
       "type": "text",
-      "analyzer": "product_ana"
+      "analyzer": "standard"
     },
     "title": {
       "type": "text",
-      "analyzer": "product_ana"
+      "analyzer": "standard"
     }
   }
 }
+

@@ -8,6 +8,10 @@
     "text": {
       "type": "text",
       "analyzer": "stemmed_ana"
+    },
+    "title": {
+      "type": "text",
+      "analyzer": "product_ana"
     }
   }
 }
