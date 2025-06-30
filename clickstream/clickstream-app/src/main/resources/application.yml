@@ -5,10 +5,16 @@ com.griddynamics.es.graduation.project:
   index: products-ship
 
   files:
-    mappings: classpath:elastic/products/mappings.json
+    signals.mapping:  classpath:elastic/products/signals-mappings.json
+    product-mappings: classpath:elastic/products/product-mappings.json
     settings: classpath:elastic/products/settings.json
     bulkData: classpath:elastic/products/products.ndjson
-
+com:
+  griddynamics:
+    es:
+      signals:
+        index:
+          product-signals
 spring:
   application:
     name: clickstream-app

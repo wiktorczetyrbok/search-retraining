@@ -16,4 +16,5 @@ public class ProductSearchResponse {
     private String currencyCode;
     private String category;
     private Map<String, String> attributes;
+    private Integer popularity;
 }

@@ -1,0 +1,28 @@
+{
+  "properties": {
+    "query": {
+      "type": "keyword"
+    },
+    "category": {
+      "type": "keyword"
+    },
+    "shownProductIds": {
+      "type": "keyword"
+    },
+    "productId": {
+      "type": "keyword"
+    },
+    "position": {
+      "type": "integer"
+    },
+    "timestamp": {
+      "type": "date"
+    },
+    "userId": {
+      "type": "keyword"
+    },
+    "eventType": {
+      "type": "keyword"
+    }
+  }
+}

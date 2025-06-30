@@ -2,14 +2,19 @@ package com.griddynamics.productindexer.repository;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.griddynamics.productindexer.model.*;
+import com.griddynamics.productindexer.model.ProductSearchRequest;
+import com.griddynamics.productindexer.model.ProductSearchResponse;
+import com.griddynamics.productindexer.model.ProductSearchResult;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.lucene.search.function.FieldValueFactorFunction;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,11 +44,20 @@ public class ProductSearchRepository {
 
         try {
             BoolQueryBuilder boolQuery = buildQuery(request);
+            SearchRequest searchRequest;
+            if (request.isBoostIncluded()) {
+                FunctionScoreQueryBuilder boostQuery = buildBoostedQuery(boolQuery);
 
-            SearchRequest searchRequest = new SearchRequest(indexName)
-                    .source(new SearchSourceBuilder()
-                            .query(boolQuery)
-                            .size(request.getSize() != null ? request.getSize() : 10));
+                searchRequest = new SearchRequest(indexName)
+                        .source(new SearchSourceBuilder()
+                                .query(boostQuery)
+                                .size(request.getSize()));
+            } else {
+                searchRequest = new SearchRequest(indexName)
+                        .source(new SearchSourceBuilder()
+                                .query(boolQuery)
+                                .size(request.getSize()));
+            }
 
             SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
 
@@ -56,6 +70,21 @@ public class ProductSearchRepository {
         }
 
         return new ProductSearchResult(productHits.size(), productHits);
+    }
+
+    private FunctionScoreQueryBuilder buildBoostedQuery(BoolQueryBuilder boolQuery) {
+        return QueryBuilders.functionScoreQuery(
+                boolQuery,
+                new FunctionScoreQueryBuilder.FilterFunctionBuilder[]{
+                        new FunctionScoreQueryBuilder.FilterFunctionBuilder(
+                                ScoreFunctionBuilders.fieldValueFactorFunction("popularity")
+                                        .modifier(FieldValueFactorFunction.Modifier.LOG1P)
+                                        .factor(0.5f)
+                                        .missing(1.0f)
+                        )
+                }
+        );
+
     }
 
     private BoolQueryBuilder buildQuery(ProductSearchRequest request) {
@@ -82,7 +111,7 @@ public class ProductSearchRepository {
             Float score = hit.getScore();
             String price = source.path("priceInfo").path("price").asText();
             String currencyCode = source.path("priceInfo").path("currencyCode").asText();
-
+            Integer popularity = source.path("popularity").asInt();
             String category = null;
             if (source.has("categories") && source.get("categories").isArray() && source.get("categories").size() > 0) {
                 category = source.get("categories").get(0).asText();
@@ -107,6 +136,7 @@ public class ProductSearchRepository {
                     .currencyCode(currencyCode)
                     .category(category)
                     .attributes(attributes)
+                    .popularity(popularity)
                     .build();
 
         } catch (IOException e) {
