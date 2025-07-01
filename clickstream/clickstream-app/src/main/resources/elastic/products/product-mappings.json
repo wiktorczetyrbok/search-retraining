@@ -32,6 +32,9 @@
     },
     "attributes": {
       "type": "flattened"
+    },
+    "popularity" : {
+      "type": "double"
     }
   }
 }

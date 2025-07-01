@@ -20,3 +20,10 @@ spring:
     name: clickstream-app
 server:
   port: 8080
+springdoc:
+  api-docs:
+    enabled: true
+
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html

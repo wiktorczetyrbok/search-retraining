@@ -51,7 +51,6 @@ public class ProductRepository {
         String settings = getStrFromResource(productsSettingsFile);
         String mappings = getStrFromResource(productsMappingsFile);
         String newIndex = indexManager.createTimestampedIndex(indexName, settings, mappings);
-        System.out.println(mappings);
         processBulkInsertData(productsBulkInsertDataFile, newIndex);
 
         indexManager.switchAliasToNewIndex(indexName, newIndex);

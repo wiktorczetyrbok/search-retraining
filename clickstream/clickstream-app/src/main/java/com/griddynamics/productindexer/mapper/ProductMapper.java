@@ -22,7 +22,7 @@ public class ProductMapper {
             Float score = hit.getScore();
             String price = source.path("priceInfo").path("price").asText();
             String currencyCode = source.path("priceInfo").path("currencyCode").asText();
-            Integer popularity = source.path("popularity").asInt();
+            Double popularity = source.path("popularity").asDouble();
             String category = null;
             if (source.has("categories") && source.get("categories").isArray() && source.get("categories").size() > 0) {
                 category = source.get("categories").get(0).asText();

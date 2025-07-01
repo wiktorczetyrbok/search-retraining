@@ -1,6 +1,5 @@
 package com.griddynamics.productindexer.repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.search.SearchRequest;
@@ -8,14 +7,15 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.MatchAllQueryBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,42 +36,60 @@ public class SignalAggregator {
     }
 
     public void aggregateAndUpdatePopularity() throws IOException {
-        Map<String, Long> clickCounts = aggregateClickCounts();
-        updateProductPopularity(clickCounts);
+        Map<String, Double> weightedPopularity = aggregateWeightedClickScores();
+        updateProductPopularity(weightedPopularity);
     }
 
-
-    public Map<String, Long> aggregateClickCounts() throws IOException {
+    public Map<String, Double> aggregateWeightedClickScores() throws IOException {
         SearchRequest searchRequest = new SearchRequest(signalsIndex);
+        searchRequest.source(new SearchSourceBuilder()
+                .query(QueryBuilders.matchAllQuery())
+                .size(10000));
 
-        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
-                .query(new MatchAllQueryBuilder())
-                .size(0)
-                .aggregation(AggregationBuilders
-                        .terms("clicks")
-                        .field("productId.keyword")
-                        .size(10000));
-
-        searchRequest.source(sourceBuilder);
         SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+        Map<String, Double> scores = evaluateScores(response);
 
-        Terms terms = response.getAggregations().get("clicks");
-        Map<String, Long> counts = new HashMap<>();
+        return scores;
+    }
 
-        for (Terms.Bucket bucket : terms.getBuckets()) {
-            counts.put(bucket.getKeyAsString(), bucket.getDocCount());
+    public Map<String, Double> evaluateScores(SearchResponse response) {
+        Map<String, Double> scores = new HashMap<>();
+        long now = Instant.now().toEpochMilli();
+
+        for (SearchHit hit : response.getHits()) {
+            Map<String, Object> doc = hit.getSourceAsMap();
+            String productId = (String) doc.get("productId");
+            String eventType = (String) doc.get("eventType");
+            String timestampStr = (String) doc.get("timestamp");
+
+            long eventTime = Instant.parse(timestampStr).toEpochMilli();
+            long ageInDays = Duration.ofMillis(now - eventTime).toDays();
+
+            double decay = Math.exp(-0.01 * ageInDays);
+            double weight;
+            if ("click".equalsIgnoreCase(eventType)) {
+                weight = 1.0;
+            } else if ("purchase".equalsIgnoreCase(eventType)) {
+                weight = 5.0;
+            } else {
+                weight = 0.0;
+            }
+
+            double score = weight * decay;
+            scores.merge(productId, score, Double::sum);
         }
 
-        log.info("Aggregated {} product click counts", counts.size());
-        return counts;
+        log.info("Aggregated weighted popularity for {} products", scores.size());
+        return scores;
     }
 
-    public void updateProductPopularity(Map<String, Long> clickCounts) throws IOException {
+
+    public void updateProductPopularity(Map<String, Double> popularityMap) throws IOException {
         BulkRequest bulkRequest = new BulkRequest();
 
-        for (Map.Entry<String, Long> entry : clickCounts.entrySet()) {
+        for (Map.Entry<String, Double> entry : popularityMap.entrySet()) {
             String productId = entry.getKey();
-            long popularity = entry.getValue();
+            double popularity = entry.getValue();
 
             UpdateRequest updateRequest = new UpdateRequest(productIndex, productId)
                     .doc(Map.of("popularity", popularity))
@@ -81,6 +99,7 @@ public class SignalAggregator {
         }
 
         client.bulk(bulkRequest, RequestOptions.DEFAULT);
-        log.info("Updated popularity for {} products", clickCounts.size());
+        log.info("Updated popularity for {} products", popularityMap.size());
     }
 }
+
