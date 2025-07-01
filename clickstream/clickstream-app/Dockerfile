@@ -1,5 +1,5 @@
 # ---- Stage 1: Build ----
-FROM eclipse-temurin:23-jdk AS builder
+FROM maven:3.9.6-eclipse-temurin-11 AS builder
 LABEL authors="wiktorczetyrbok"
 
 WORKDIR /app
@@ -11,7 +11,7 @@ COPY src ./src
 RUN mvn package -DskipTests
 
 # ---- Stage 2: Runtime ----
-FROM eclipse-temurin:23-jdk
+FROM eclipse-temurin:11-jdk
 
 WORKDIR /app
 

@@ -4,7 +4,7 @@ com.griddynamics.es.graduation.project:
   esHost: http://34.65.46.77:9200
   user:
   pass:
-  index: products-ship
+  index: products-clickstream
 
   files:
     signals.mapping:  classpath:elastic/products/signals-mappings.json
