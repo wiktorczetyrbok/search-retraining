@@ -24,7 +24,6 @@ import java.util.Map;
 public class SignalAggregator {
 
     private final RestHighLevelClient client;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${com.griddynamics.es.graduation.project.index}")
     private String productIndex;

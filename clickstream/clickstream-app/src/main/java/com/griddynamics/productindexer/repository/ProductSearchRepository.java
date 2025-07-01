@@ -1,7 +1,6 @@
 package com.griddynamics.productindexer.repository;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.griddynamics.productindexer.model.ProductSearchRequest;
 import com.griddynamics.productindexer.model.ProductSearchResponse;
 import com.griddynamics.productindexer.model.ProductSearchResult;
@@ -20,16 +19,14 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static com.griddynamics.productindexer.mapper.ProductMapper.parseProductHit;
 
 @Component
 public class ProductSearchRepository {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     private final RestHighLevelClient esClient;
 
     @Value("${com.griddynamics.es.graduation.project.index}")
@@ -99,53 +96,6 @@ public class ProductSearchRepository {
         }
 
         return boolQuery;
-    }
-
-    private ProductSearchResponse parseProductHit(SearchHit hit) {
-        try {
-            JsonNode source = objectMapper.readTree(hit.getSourceAsString());
-
-            String id = source.path("id").asText();
-            String title = source.path("title").asText();
-            String description = source.path("description").asText();
-            Float score = hit.getScore();
-            String price = source.path("priceInfo").path("price").asText();
-            String currencyCode = source.path("priceInfo").path("currencyCode").asText();
-            Integer popularity = source.path("popularity").asInt();
-            String category = null;
-            if (source.has("categories") && source.get("categories").isArray() && source.get("categories").size() > 0) {
-                category = source.get("categories").get(0).asText();
-            }
-
-            Map<String, String> attributes = new HashMap<>();
-            if (source.has("attributes")) {
-                source.get("attributes").fields().forEachRemaining(entry -> {
-                    JsonNode textNode = entry.getValue().path("text");
-                    if (textNode.isArray() && textNode.size() > 0) {
-                        attributes.put(entry.getKey(), textNode.get(0).asText());
-                    }
-                });
-            }
-
-            return ProductSearchResponse.builder()
-                    .id(id)
-                    .score(score)
-                    .title(title)
-                    .description(description)
-                    .price(price)
-                    .currencyCode(currencyCode)
-                    .category(category)
-                    .attributes(attributes)
-                    .popularity(popularity)
-                    .build();
-
-        } catch (IOException e) {
-            return ProductSearchResponse.builder()
-                    .id("error")
-                    .title("Error parsing hit")
-                    .description("")
-                    .build();
-        }
     }
 
 }
