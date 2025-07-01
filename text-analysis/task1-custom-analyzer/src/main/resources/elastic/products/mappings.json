@@ -1,0 +1,17 @@
+{
+  "dynamic": false,
+  "properties": {
+    "topic": {
+      "type": "text",
+      "analyzer": "product_ana"
+    },
+    "text": {
+      "type": "text",
+      "analyzer": "product_ana"
+    },
+    "title": {
+      "type": "text",
+      "analyzer": "product_ana"
+    }
+  }
+}

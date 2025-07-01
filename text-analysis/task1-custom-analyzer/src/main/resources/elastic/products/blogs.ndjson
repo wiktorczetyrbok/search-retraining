@@ -1,0 +1,50 @@
+{"index": {"_id": 0}}
+{"id": 0, "gender": "male", "age": "33", "topic": "Education", "date": "01,June,2004", "title": "A Morning at the Café", "text": "The café was lovely, filled with aroma of fresh croissants."}
+{"index": {"_id": 1}}
+{"id": 1, "gender": "male", "age": "33", "topic": "Student", "date": "02,June,2004", "title": "Wanderlust Adventures", "text": "I love traveling! Beaches, mountains, and cities alike."}
+{"index": {"_id": 2}}
+{"id": 2, "gender": "male", "age": "28", "topic": "Cooking", "date": "03,June,2004", "title": "The Mysterious School Book", "text": "He's got the teacher's book, not the student's version."}
+{"index": {"_id": 3}}
+{"id": 3, "gender": "male", "age": "28", "topic": "Health", "date": "04,June,2004", "title": "A Fairytale Wedding", "text": "These weddings were truly magical and unforgettable."}
+{"index": {"_id": 4}}
+{"id": 4, "gender": "male", "age": "15", "topic": "Travel", "date": "05,June,2004", "title": "AI: The Future Is Now", "text": "Reading about artificial intelligence fascinates me."}
+{"index": {"_id": 5}}
+{"id": 5, "gender": "male", "age": "22", "topic": "Student", "date": "06,June,2004", "title": "Perfecting Pasta", "text": "Cooking pasta requires attention at the boiling point."}
+{"index": {"_id": 6}}
+{"id": 6, "gender": "male", "age": "15", "topic": "Music", "date": "07,June,2004", "title": "In Defense of Clichés", "text": "Clichés aren't always bad; sometimes they're useful."}
+{"index": {"_id": 7}}
+{"id": 7, "gender": "male", "age": "15", "topic": "Movies", "date": "08,June,2004", "title": "The Power of a Voice", "text": "A singer's voice often defines the whole performance."}
+{"index": {"_id": 8}}
+{"id": 8, "gender": "male", "age": "15", "topic": "Health", "date": "09,June,2004", "title": "Eating Smart", "text": "Health-conscious choices, like organic veggies, matter."}
+{"index": {"_id": 9}}
+{"id": 9, "gender": "male", "age": "15", "topic": "Technology", "date": "10,June,2004", "title": "Postcard from São Paulo", "text": "I visited São Paulo in June — what a vibrant place!"}
+{"index": {"_id": 10}}
+{"id": 10, "gender": "male", "age": "22", "topic": "Music", "date": "11,June,2004", "title": "Playgrounds of Today", "text": "The children's playgrounds are clean and modern."}
+{"index": {"_id": 11}}
+{"id": 11, "gender": "male", "age": "22", "topic": "Technology", "date": "12,June,2004", "title": "Books, Coffee, and Culture", "text": "Bookshelves in cafés tell a story of culture and taste."}
+{"index": {"_id": 12}}
+{"id": 12, "gender": "male", "age": "15", "topic": "Student", "date": "13,June,2004", "title": "Jump Into Tech", "text": "Diving into new technologies opens up many careers."}
+{"index": {"_id": 13}}
+{"id": 13, "gender": "male", "age": "22", "topic": "Education", "date": "14,June,2004", "title": "Superficial Insights", "text": "His explanations were good, but they lacked depth."}
+{"index": {"_id": 14}}
+{"id": 14, "gender": "male", "age": "22", "topic": "Technology", "date": "15,June,2004", "title": "Weekend Football Frenzy", "text": "Football matches excite crowds every weekend."}
+{"index": {"_id": 15}}
+{"id": 15, "gender": "male", "age": "33", "topic": "Travel", "date": "16,June,2004", "title": "Premiere Hype", "text": "Movie-goers lined up at 9 a.m. to get premiere tickets!"}
+{"index": {"_id": 16}}
+{"id": 16, "gender": "male", "age": "22", "topic": "InvestmentBanking", "date": "17,June,2004", "title": "Digital Natives", "text": "Tech-savvy kids understand smartphones better than most adults."}
+{"index": {"_id": 17}}
+{"id": 17, "gender": "male", "age": "15", "topic": "Travel", "date": "18,June,2004", "title": "Dream Destinations", "text": "They're planning trips: Rome, Paris, and Zürich!"}
+{"index": {"_id": 18}}
+{"id": 18, "gender": "male", "age": "15", "topic": "Movies", "date": "19,June,2004", "title": "The Art of Data", "text": "Some data sets are huge—others are barely useful."}
+{"index": {"_id": 19}}
+{"id": 19, "gender": "male", "age": "15", "topic": "Health", "date": "20,June,2004", "title": "The Trouble with Noise", "text": "Noisy environments make concentration harder."}
+{"index": {"_id": 20}}
+{"id": 20, "gender": "male", "age": "28", "topic": "Movies", "date": "21,June,2004", "title": "Smarter Systems", "text": "The AI's recommendation engine improved results."}
+{"index": {"_id": 21}}
+{"id": 21, "gender": "male", "age": "28", "topic": "Cooking", "date": "22,June,2004", "title": "Green Innovation", "text": "She's building a startup focused on eco-friendly packaging."}
+{"index": {"_id": 22}}
+{"id": 22, "gender": "male", "age": "22", "topic": "Health", "date": "23,June,2004", "title": "Truth in Numbers", "text": "Mathematics doesn't lie, but people misinterpret it."}
+{"index": {"_id": 23}}
+{"id": 23, "gender": "male", "age": "15", "topic": "Sports", "date": "24,June,2004", "title": "The Meaning of Freedom", "text": "‘Freedom' is a powerful word—it means many things."}
+{"index": {"_id": 24}}
+{"id": 24, "gender": "male", "age": "15", "topic": "Technology", "date": "25,June,2004", "title": "Cat Café Preferences", "text": "My cousin's cat Café prefers chicken to tuna."}

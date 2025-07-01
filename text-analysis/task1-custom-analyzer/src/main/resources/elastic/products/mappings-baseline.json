@@ -1,0 +1,18 @@
+{
+  "dynamic": false,
+  "properties": {
+    "topic": {
+      "type": "text",
+      "analyzer": "standard"
+    },
+    "text": {
+      "type": "text",
+      "analyzer": "standard"
+    },
+    "title": {
+      "type": "text",
+      "analyzer": "standard"
+    }
+  }
+}
+
