@@ -18,9 +18,6 @@
     "timestamp": {
       "type": "date"
     },
-    "userId": {
-      "type": "keyword"
-    },
     "eventType": {
       "type": "keyword"
     }
