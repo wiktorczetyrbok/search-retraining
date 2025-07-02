@@ -1,0 +1,171 @@
+Schema Design
+product-signals index
+index captures user interaction events like clicks and purchases
+
+"_source": {
+          "query": "removing refrigeration whynter faucet furniture",
+          "category": "Appliances > Dishwashers > Built-In Dishwashers",
+          "shownProductIds": ["365","64","65","62","61","175","437","295","198","134"],
+          "productId": "62",
+          "position": 4,
+          "timestamp": "2025-06-21T08:55:07.427978Z",
+          "eventType": "click"
+        }
+      }
+mappings:
+{
+  "properties": {
+    "query":        { "type": "keyword" },
+    "category":     { "type": "keyword" },
+    "shownProductIds": { "type": "keyword" },
+    "productId":    { "type": "keyword" },
+    "position":     { "type": "integer" },
+    "timestamp":    { "type": "date" },
+    "eventType":    { "type": "keyword" }
+  }
+}
+
+
+products-clickstream index
+This is the main product index that contains all products info
+It was modified by adding additional field
+
+"popularity": { "type": "float" }
+
+It holds a computed score (popularity = clicks + 5 * purchases)
+
+Signals are ingested using a batch job that parses clickstream logs and indexes them into product-signals
+Could also be done via /click endpoint request body
+
+the search query is modified by adding scoring to initial boolQuery
+
+QueryBuilders.functionScoreQuery(
+    boolQuery,
+    new FunctionScoreQueryBuilder.FilterFunctionBuilder[]{
+        new FunctionScoreQueryBuilder.FilterFunctionBuilder(
+            ScoreFunctionBuilders.fieldValueFactorFunction("popularity")
+                .modifier(FieldValueFactorFunction.Modifier.LOG1P)
+                .factor(2f)
+                .missing(0.5f)
+        )
+    }
+)
+LOG1P : This applies log(1 + popularity) to smooth out the impact of very large values
+and prevent extremely popular products to always show up first
+
+factor(2f): This sets the boost multiplier used to strengthen the influence of popularity
+
+missing(0.5f): documents without popularity prevented from being penalized with a score of zero.
+
+
+Example:
+{
+    "totalHits": 10,
+    "products": [
+        {
+            "score": 11.702702,
+            "id": "347",
+            "popularity": 20.81020822936061
+        },
+        {
+            "score": 10.710308,
+            "id": "62",
+            "popularity": 8.184641779179438
+        },
+        {
+            "score": 6.9756837,
+            "id": "257",
+            "popularity": 16.57938192977536
+        },
+        {
+            "score": 6.332645,
+            "id": "365",
+            "popularity": 27.375740651704486
+        },
+        {
+            "score": 4.6484838,
+            "id": "369",
+            "popularity": 24.55071670311204
+        },
+        {
+            "score": 4.462307,
+            "id": "367",
+            "popularity": 22.6989381053643
+        },
+        {
+            "score": 4.45417,
+            "id": "364",
+            "popularity": 20.131040092921342
+        },
+        {
+            "score": 4.3532977,
+            "id": "362",
+            "popularity": 23.399214385224337
+        },
+        {
+            "score": 4.266854,
+            "id": "366",
+            "popularity": 24.417859813468027
+        },
+        {
+            "score": 3.8620503,
+            "id": "363",
+            "popularity": 17.6995460111854
+        }
+    ]
+}
+{
+    "totalHits": 10,
+    "products": [
+        {
+            "score": 15.134747,
+            "id": "347",
+            "popularity": 20.81020822936061
+        },
+        {
+            "score": 14.64186,
+            "id": "62",
+            "popularity": 8.169968194632961
+        },
+        {
+            "score": 9.469492,
+            "id": "257",
+            "popularity": 16.562917761946387
+        },
+        {
+            "score": 7.762229,
+            "id": "365",
+            "popularity": 27.36806856023777
+        },
+        {
+            "score": 5.7195916,
+            "id": "369",
+            "popularity": 24.52542767844907
+        },
+        {
+            "score": 5.5313306,
+            "id": "364",
+            "popularity": 20.08089603380436
+        },
+        {
+            "score": 5.5086927,
+            "id": "367",
+            "popularity": 22.65161365078197
+        },
+        {
+            "score": 5.368295,
+            "id": "362",
+            "popularity": 23.399214385224337
+        },
+        {
+            "score": 5.247895,
+            "id": "366",
+            "popularity": 24.37193400789099
+        },
+        {
+            "score": 4.828342,
+            "id": "363",
+            "popularity": 17.6995460111854
+        }
+    ]
+}
