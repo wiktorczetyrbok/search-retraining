@@ -1,0 +1,26 @@
+spring.config.activate.on-profile: cloud
+
+com.griddynamics.es.graduation.project:
+  esHost: http://34.65.46.77:9200
+  user:
+  pass:
+  index: products-clickstream
+
+  files:
+    signals.mapping:  classpath:elastic/products/signals-mappings.json
+    product-mappings: classpath:elastic/products/product-mappings.json
+    settings: classpath:elastic/products/settings.json
+    bulkData: classpath:elastic/products/products.ndjson
+com:
+  griddynamics:
+    es:
+      signals:
+        index:
+          product-signals
+spring:
+  application:
+    name: clickstream-app
+server:
+  port: 8080
+
+
