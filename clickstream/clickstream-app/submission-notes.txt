@@ -59,6 +59,7 @@ missing(0.5f): documents without popularity prevented from being penalized with 
 
 
 Example:
+without boosting for query "kitchen product"
 {
     "totalHits": 10,
     "products": [
@@ -114,6 +115,7 @@ Example:
         }
     ]
 }
+with boosting for query "kitchen product":
 {
     "totalHits": 10,
     "products": [
@@ -169,3 +171,5 @@ Example:
         }
     ]
 }
+Compared on diagram diagram.png in the root folder.
+
