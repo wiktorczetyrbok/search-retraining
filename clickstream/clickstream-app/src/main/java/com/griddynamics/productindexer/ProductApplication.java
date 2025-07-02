@@ -25,7 +25,8 @@ public class ProductApplication implements CommandLineRunner {
 
     @Override
     public void run(String... strings) throws IOException {
-        productService.recreateIndex();
-        signalAggregator.aggregateAndUpdatePopularity();
+//       productService.recreateIndex();
+//
+//        signalAggregator.aggregateAndUpdatePopularity();
     }
 }

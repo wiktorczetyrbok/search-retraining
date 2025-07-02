@@ -35,15 +35,21 @@ public class SignalIndexer {
 
     public void indexSignals(Optional<SignalEvent> optionalSignalEvent) throws IOException {
         if (optionalSignalEvent.isPresent()) {
-            SignalEvent signalEvent = optionalSignalEvent.get();
-            IndexRequest indexRequest = new IndexRequest(signalsIndex)
-                    .source(objectMapper.writeValueAsString(signalEvent), XContentType.JSON);
-
-            client.index(indexRequest, RequestOptions.DEFAULT);
-            log.info("Indexed single signal event: {}", signalEvent);
-            return;
+            indexSingleSignal(optionalSignalEvent.get());
+        } else {
+            indexBulkSignalsFromFile();
         }
+    }
 
+    private void indexSingleSignal(SignalEvent signalEvent) throws IOException {
+        IndexRequest indexRequest = new IndexRequest(signalsIndex)
+                .source(objectMapper.writeValueAsString(signalEvent), XContentType.JSON);
+
+        client.index(indexRequest, RequestOptions.DEFAULT);
+        log.info("Indexed single signal event: {}", signalEvent);
+    }
+
+    private void indexBulkSignalsFromFile() throws IOException {
         try (InputStream inputStream = new ClassPathResource("elastic/products/clickstream.json").getInputStream()) {
             JsonNode jsonArray = objectMapper.readTree(inputStream);
             BulkRequest bulkRequest = new BulkRequest();

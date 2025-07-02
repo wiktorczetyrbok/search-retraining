@@ -76,7 +76,7 @@ public class ProductSearchRepository {
                         new FunctionScoreQueryBuilder.FilterFunctionBuilder(
                                 ScoreFunctionBuilders.fieldValueFactorFunction("popularity")
                                         .modifier(FieldValueFactorFunction.Modifier.LOG1P)
-                                        .factor(1f)
+                                        .factor(2f)
                                         .missing(0.5f)
                         )
                 }

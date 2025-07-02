@@ -48,6 +48,11 @@ public class ProductIndexManager {
 
     public void switchAliasToNewIndex(String alias, String newIndexName) {
         try {
+            if (esClient.indices().exists(new GetIndexRequest(alias), RequestOptions.DEFAULT)) {
+                esClient.indices().delete(new DeleteIndexRequest(alias), RequestOptions.DEFAULT);
+                System.out.println("Deleted conflicting index with alias name: " + alias);
+            }
+
             GetAliasesRequest getAliasRequest = new GetAliasesRequest(alias);
             GetAliasesResponse aliasResponse = esClient.indices().getAlias(getAliasRequest, RequestOptions.DEFAULT);
 
@@ -63,6 +68,7 @@ public class ProductIndexManager {
             throw new RuntimeException("Alias switch failed to " + newIndexName, e);
         }
     }
+
 
     public void deleteOldIndices(String aliasPrefix, int keepCount) {
         try {
