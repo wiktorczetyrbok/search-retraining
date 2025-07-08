@@ -1,0 +1,72 @@
+version: '3'
+services:
+  zookeeper:
+    image: zookeeper:3.9
+    container_name: zookeeper
+    restart: always
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_4LW_COMMANDS_WHITELIST: "mntr,conf,ruok"  # Enable commands needed by Solr
+    volumes:
+      - zk-data:/data
+      - zk-datalog:/datalog
+
+  solr1:
+    image: solr:latest
+    container_name: solr1
+    ports:
+      - "8981:8983"
+    environment:
+      - ZK_HOST=zookeeper:2181
+    depends_on:
+      - zookeeper
+    volumes:
+      - solr1-data:/var/solr
+    command:
+      - solr
+      - start
+      - -cloud
+      - -f
+
+  solr2:
+    image: solr:latest
+    container_name: solr2
+    ports:
+      - "8982:8983"
+    environment:
+      - ZK_HOST=zookeeper:2181
+    depends_on:
+      - zookeeper
+    volumes:
+      - solr2-data:/var/solr
+    command:
+      - solr
+      - start
+      - -cloud
+      - -f
+
+  solr3:
+    image: solr:latest
+    container_name: solr3
+    ports:
+      - "8983:8983"
+    environment:
+      - ZK_HOST=zookeeper:2181
+    depends_on:
+      - zookeeper
+    volumes:
+      - solr3-data:/var/solr
+    command:
+      - solr
+      - start
+      - -cloud
+      - -f
+
+volumes:
+  zk-data:
+  zk-datalog:
+  solr1-data:
+  solr2-data:
+  solr3-data:

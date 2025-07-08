@@ -1,0 +1,161 @@
+Part 1 : Set up
+docker-compose up -d
+
+Create the demo collection with 2 shards and 2 replicas per shard:
+
+docker exec -it solr1 solr create -c demo_collection -shards 2 -replicationFactor 2
+------------------------------------------------------------------------------------------------------------------------
+Part 2: Exploring the Cluster
+Solr Admin UI by visiting http://localhost:8983/solr/
+
+Navigate to the "Cloud" section to visualize your SolrCloud cluster. You should now see:
+- The demo_collection with its 2 shards
+- Distribution of replicas across nodes
+- Leader election for each shard
+
+Examine ZooKeeper contents using the Solr Admin UI:
+- Go to "Cloud" > "Tree" to see ZooKeeper
+- Observe how configuration and cluster state are stored
+- ZooKeeper status should be green
+Verify ZooKeeper is working correctly using your machine terminal:
+
+checking zookeper:
+
+docker exec -it zookeeper zkServer.sh status
+
+------------------------------------------------------------------------------------------------------------------------
+Part 3: Creating and Managing Collections
+Create a basic sharded collection
+
+docker exec -it solr1 solr create -c products -shards 2 -replicationFactor 2
+
+
+# Create a config directory
+docker exec -it solr1 bash -c "mkdir /tmp/custom_config"
+# Copy default configs
+docker exec -it solr1 bash -c "cp -r /opt/solr/server/solr/configsets/_default /tmp/custom_config"
+# now it's custom
+# Create config via ZooKeeper
+docker exec -it solr1 bash -c "cd /opt/solr && server/scripts/cloud-scripts/zkcli.sh -zkhost zookeeper:2181 -cmd upconfig -confname custom_config -confdir /tmp/custom_config"
+
+
+Then create a collection using this config:
+docker exec -it solr1 solr create -c custom_collection -n custom_config -shards 3 -replicationFactor 2
+
+
+Create a collection with the implicit router
+docker exec -it solr1 curl "http://localhost:8983/solr/admin/collections?action=CREATE&name=routed_collection&router.name=implicit&shards=eu,us,asia&maxShardsPerNode=3&replicationFactor=2"
+
+------------------------------------------------------------------------------------------------------------------------
+Part 4: Working with Replicas
+
+Go to http://localhost:8983/solr/#/~cloud?view=nodes and note your nodes. For example on my machine I have:
+
+Use your node host ip address (basically docker ip address) as nodeX_host_ip, for example:
+"http://localhost:8983/solr/admin/collections?action=ADDREPLICA&collection=products&shard=shard1&type=NRT&node={node2_host_ip}:8983_solr"
+become:
+"http://localhost:8983/solr/admin/collections?action=ADDREPLICA&collection=products&shard=shard1&type=NRT&node=172.20.0.4:8983_solr"
+
+
+# Add an NRT replica
+docker exec -it solr1 curl "http://localhost:8983/solr/admin/collections?action=ADDREPLICA&collection=products&shard=shard1&type=NRT&node=172.24.0.4:8983_solr"
+
+# Add a TLOG replica
+docker exec -it solr1 curl "http://localhost:8983/solr/admin/collections?action=ADDREPLICA&collection=products&shard=shard1&type=TLOG&node=172.24.0.5:8983_solr"
+
+# Add a PULL replica
+docker exec -it solr1 curl "http://localhost:8983/solr/admin/collections?action=ADDREPLICA&collection=products&shard=shard2&type=PULL&node=172.24.0.5:8983_solr"
+
+Simulate a node failure and observe replica behavior
+Stop one of the Solr nodes
+docker stop solr2
+
+Observe in the Solr Admin UI ( http://localhost:8983/solr/#/~cloud?view=nodes ) how the system recovers:
+- Leader election occurs if a leader replica was on the failed node
+- Queries continue to be served from remaining replicas
+
+Restart the node and watch the recovery process:
+docker start solr2
+
+------------------------------------------------------------------------------------------------------------------------
+Create new fresh index:
+docker exec -it solr1 curl "http://localhost:8983/solr/admin/collections?action=CREATE&name=multi_shard&numShards=4&replicationFactor=1&router.name=compositeId&collection.configName=_default"
+
+Copy books.json to docker container:
+docker cp ./book_batches_output/ solr1:/tmp/
+
+Index first batch of data:
+docker exec -it solr1 curl -X POST -H "Content-Type: application/json" "http://localhost:8983/solr/books/update" --data-binary @/tmp/book_batches_output/book_batch_1.json
+
+Examine the segments after indexing each batch
+go to "http://localhost:8981/solr/#/"
+and choose any core with name starts "books". For instance on my cluster:
+"http://localhost:8981/solr/#/books_shard1_replica_n1/core-overview"
+
+Keep Indexing another batch of data, keep an eye on a segment count between 9 and 11.
+Did you notice something cool? Why did it happen? Which parameter is responsible for that (hint: it’s in a collection configuration)
+
+ADVANCED PART: play with indexing and try to trigger a segment merge by calling:
+docker exec -it solr1 curl "http://localhost:8983/solr/books/update?optimize=true"
+
+Additionally you can check the number of segments running that query:
+docker exec -it solr1 curl "http://localhost:8983/solr/admin/metrics?group=core.books&prefix=INDEX.segments"
+------------------------------------------------------------------------------------------------------------------------
+Create the index with many shards and compositeId router:
+docker exec -it solr1 curl "http://localhost:8983/solr/admin/collections?action=CREATE&name=multi_shard&numShards=4&replicationFactor=1&router.name=compositeId&collection.configName=_default"
+
+ Index documents with various routing keys to the new collection
+docker exec -it solr1 curl -X POST -H "Content-Type: application/json" "http://localhost:8983/solr/multi_shard/update?commit=true" -d '[ {"id": "electronics!product1", "name": "Smartphone", "category": "Electronics"}, {"id": "electronics!product2", "name": "Laptop", "category": "Electronics"}, {"id": "clothing!product3", "name": "T-shirt", "category": "Clothing"}, {"id": "clothing!product4", "name": "Jeans", "category": "Clothing"}, {"id": "books!product5", "name": "Novel", "category": "Books"}, {"id": "books!product6", "name": "Textbook", "category": "Books"}, {"id": "furniture!product7", "name": "Chair", "category": "Furniture"}, {"id": "furniture!product8", "name": "Table", "category": "Furniture"} ]'
+
+Query using routing parameters. Response should contain entities based on route. Note that sometimes we can see other entities on the same shard. It’s because of the hash function:
+docker exec -it solr1 curl "http://localhost:8983/solr/multi_shard/select?q=*:*&_route_=electronics&wt=json&indent=true&debug=true"
+docker exec -it solr1 curl "http://localhost:8983/solr/multi_shard/select?q=*:*&_route_=clothing&wt=json&indent=true&debug=true"
+docker exec -it solr1 curl "http://localhost:8983/solr/multi_shard/select?q=*:*&_route_=books&wt=json&indent=true&debug=true"
+docker exec -it solr1 curl "http://localhost:8983/solr/multi_shard/select?q=*:*&_route_=furniture&wt=json&indent=true&debug=true"
+
+
+The key points to understand about document routing in SolrCloud:
+Hash-Based Distribution: The compositeId router uses a hash function on the routing key (prefix before the "!") to determine which shard a document goes to.
+Uniform Distribution: There is a chance that different routing keys will hash to the same shard. This is what happened in my case - both "electronics!" and "clothing!" hashed to shard2.
+Query Routing Still Works: Even though both keys hashed to the same shard, using _route_=electronics or _route_=clothing should still only query the specific shard (shard2 in this case) rather than all shards. This provides performance benefits in larger clusters.
+Better Demonstration with More Shards: With more shards (like 4 in our example), we're more likely to see the routing keys distribute across different shards, making the routing behavior more obvious.
+route Field Purpose: The _route_ parameter in queries is primarily used to target specific shards, not to filter documents. If all my documents happen to be in the same shard, I still get all documents with any routing key that maps to that shard.
+
+------------------------------------------------------------------------------------------------------------------------
+Part 7: In-Place Updates Demonstration
+Create a schema with fields suitable for in-place updates:
+mkdir -p inplace_config/conf
+docker cp solr1:/opt/solr/server/solr/configsets/_default/conf/. inplace_config/conf/
+
+
+Edit inplace_config/conf/managed-schema to add a field that supports in-place updates:
+<!-- Add this to the schema file -->
+<field name="view_count" type="pint" docValues="true" indexed="false" stored="false"/>
+
+Copy new config to the docker container:
+docker cp ./inplace_config/conf/* solr1:/tmp/inplace_config/
+
+Upload the modified configuration:
+docker exec -it solr1 bash -c "cd /opt/solr && server/scripts/cloud-scripts/zkcli.sh -zkhost zookeeper:2181 -cmd upconfig -confname inplace_config -confdir /path/on/container/to/inplace_config/conf"
+
+Create a collection with this configuration:
+docker exec -it solr1 solr create -c inplace_collection -n inplace_config -shards 2 -replicationFactor 2
+
+Index documents with the field that supports in-place updates:
+docker exec -it solr1 curl -X POST -H "Content-Type: application/json" "http://localhost:8983/solr/inplace_collection/update" -d '[
+  {"id": "product1", "name": "Smartphone", "view_count": 0},
+  {"id": "product2", "name": "Laptop", "view_count": 0}
+]'
+
+Perform in-place updates:
+docker exec -it solr1 curl -X POST -H "Content-Type: application/json" "http://localhost:8983/solr/inplace_collection/update?commit=true" -d '[
+  {"id": "product1", "view_count": {"inc": 1}}
+]'
+
+Check the updated document:
+docker exec -it solr1 curl "http://localhost:8983/solr/inplace_collection/select?q=id:product1"
+
+------------------------------------------------------------------------------------------------------------------------
+Clean Up
+docker-compose down -v  # The -v flag removes the volumes
+
