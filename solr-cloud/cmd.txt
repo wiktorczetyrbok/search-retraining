@@ -125,7 +125,7 @@ route Field Purpose: The _route_ parameter in queries is primarily used to targe
 Part 7: In-Place Updates Demonstration
 Create a schema with fields suitable for in-place updates:
 mkdir -p inplace_config/conf
-docker cp solr1:/opt/solr/server/solr/configsets/_default/conf/. inplace_config/conf/
+docker cp solr1:/opt/solr/server/solr/configsets/_default/conf/ inplace_config/conf/
 
 
 Edit inplace_config/conf/managed-schema to add a field that supports in-place updates:
@@ -136,7 +136,7 @@ Copy new config to the docker container:
 docker cp ./inplace_config/conf/* solr1:/tmp/inplace_config/
 
 Upload the modified configuration:
-docker exec -it solr1 bash -c "cd /opt/solr && server/scripts/cloud-scripts/zkcli.sh -zkhost zookeeper:2181 -cmd upconfig -confname inplace_config -confdir /path/on/container/to/inplace_config/conf"
+docker exec -it solr1 bash -c "cd /opt/solr && server/scripts/cloud-scripts/zkcli.sh -zkhost zookeeper:2181 -cmd upconfig -confname inplace_config -confdir /tmp/inplace_config/"
 
 Create a collection with this configuration:
 docker exec -it solr1 solr create -c inplace_collection -n inplace_config -shards 2 -replicationFactor 2
