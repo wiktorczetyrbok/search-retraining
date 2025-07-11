@@ -1,0 +1,41 @@
+{
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "title": {
+      "type": "text"
+    },
+    "description": {
+      "type": "text"
+    },
+    "name": {
+      "type": "keyword"
+    },
+    "uri": {
+      "type": "keyword"
+    },
+    "availableTime": {
+      "type": "date"
+    },
+    "brand": {
+      "type": "keyword"
+    },
+    "category": {
+      "type": "text"
+    },
+    "price": {
+      "type": "float"
+    },
+    "currencyCode": {
+      "type": "keyword"
+    },
+    "attributes": {
+      "type": "flattened"
+    },
+    "popularity" : {
+      "type": "double"
+    }
+  }
+}
+
