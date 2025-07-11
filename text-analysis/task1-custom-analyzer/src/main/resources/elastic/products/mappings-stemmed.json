@@ -1,0 +1,18 @@
+{
+  "dynamic": false,
+  "properties": {
+    "topic": {
+      "type": "text",
+      "analyzer": "stemmed_ana"
+    },
+    "text": {
+      "type": "text",
+      "analyzer": "stemmed_ana"
+    },
+    "title": {
+      "type": "text",
+      "analyzer": "product_ana"
+    }
+  }
+}
+
