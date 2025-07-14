@@ -2,7 +2,7 @@ package com.griddynamics.productindexer.service;
 
 import com.griddynamics.productindexer.model.ProductSearchRequest;
 import com.griddynamics.productindexer.model.ProductSearchResult;
-import com.griddynamics.productindexer.repository.ProductRepository;
+import com.griddynamics.productindexer.repository.ProductIndexingRepository;
 import com.griddynamics.productindexer.repository.ProductSearchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,13 +11,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProductService {
 
-    private final
-    ProductRepository productRepository;
+    private final ProductIndexingRepository productIndexingRepository;
     private final ProductSearchRepository productSearchRepository;
 
 
     public void recreateIndex() {
-        productRepository.recreateIndex();
+        productIndexingRepository.recreateIndex();
     }
 
     public ProductSearchResult searchProducts(ProductSearchRequest request) {
