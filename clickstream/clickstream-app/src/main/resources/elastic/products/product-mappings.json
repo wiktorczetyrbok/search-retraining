@@ -3,26 +3,32 @@
     "id": {
       "type": "keyword"
     },
-    "title": {
-      "type": "text"
-    },
-    "description": {
-      "type": "text"
+    "brand": {
+      "type": "text",
+      "analyzer": "text_analyzer",
+      "index_options": "docs",
+      "norms": false,
+      "fields": {
+        "raw": {
+          "type": "keyword"
+        },
+        "shingles": {
+          "type": "text",
+          "analyzer": "shingle_analyzer"
+        }
+      }
     },
     "name": {
-      "type": "keyword"
-    },
-    "uri": {
-      "type": "keyword"
-    },
-    "availableTime": {
-      "type": "date"
-    },
-    "brand": {
-      "type": "keyword"
-    },
-    "category": {
-      "type": "text"
+      "type": "text",
+      "analyzer": "text_analyzer",
+      "index_options": "docs",
+      "norms": false,
+      "fields": {
+        "shingles": {
+          "type": "text",
+          "analyzer": "shingle_analyzer"
+        }
+      }
     },
     "price": {
       "type": "float"
@@ -35,7 +41,32 @@
     },
     "popularity" : {
       "type": "double"
+    },
+    "skus": {
+      "type": "nested",
+      "properties": {
+        "color": {
+          "type": "keyword",
+          "doc_values": false,
+          "normalizer": "keyword-normalizer",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        },
+
+        "size": {
+          "type": "keyword",
+          "doc_values": false,
+          "normalizer": "keyword-normalizer",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
     }
   }
 }
-

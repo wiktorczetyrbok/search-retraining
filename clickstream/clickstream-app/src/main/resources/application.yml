@@ -3,7 +3,11 @@ com.griddynamics.es.graduation.project:
   user:
   pass:
   index: products-ship
-
+  request:
+    default:
+      findByQuerySize: 10
+      getAllSize: 50
+    minQueryLength: 3
   files:
     signals.mapping:  classpath:elastic/products/signals-mappings.json
     product-mappings: classpath:elastic/products/product-mappings.json
