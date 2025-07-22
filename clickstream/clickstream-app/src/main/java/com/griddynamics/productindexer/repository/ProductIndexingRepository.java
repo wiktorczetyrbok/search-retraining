@@ -26,7 +26,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Component
 @Slf4j
-public class ProductRepository {
+public class ProductIndexingRepository {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
